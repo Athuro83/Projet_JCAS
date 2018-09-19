@@ -228,20 +228,10 @@ import java.util.Hashtable;
 
 CHIFFRE        = [0-9]
 LETTRE         = [a-zA-Z]
-NUM 	         = {CHIFFRE}{CHIFFRE}*
-IDF            = {LETTRE}({LETTRE}|{CHIFFRE}|'_')*
-SIGNE          = '+'|'-'|''
-EXP            = ('E'{SIGNE}{NUM})|('e'{SIGNE}{NUM})
-DEC            = {NUM}'.'{NUM}
-INT            = {NUM}
-REEL           = {DEC}|{DEC}{EXP}
-CHAINE_CAR     = ""|"!"|[\043-\176]
-CHAINE         = \"({CHAINE_CAR}|(\"\"))*\"
-COMMENT        = "--"([\040-\176]|\t)*\t\n
 
+NUM 	       = {CHIFFRE}{CHIFFRE}*
 
-
-
+IDF          = {LETTRE}({LETTRE}|{CHIFFRE}|'_')*
 
 // ------------
 // A COMPLETER
@@ -257,35 +247,24 @@ COMMENT        = "--"([\040-\176]|\t)*\t\n
 
 \n                     { }
 
+// Reconnaissance des identificateurs et des mots réservés
+{IDF}                  { 
+                         Integer keyword = dictionnaire.get(yytext());
+                         if(keyword != NULL){
+                            // On a trouvé un mot clé du langage
+                            return symbol(keyword);
+                         }
+                         // On a trouvé un identificateur
+                         return symbol(sym.IDF, yytext())
+                       }
+
+"+"                    { return symbol(sym.PLUS); }
+
 .                      { System.out.println("Erreur Lexicale : '" +
                             yytext() + "' non reconnu ... ligne " + 
                             numLigne()) ;
                          throw new ErreurLexicale() ; }
-// ------------
-// regles pour les symboles speciaux
-// ------------
-
-":="		      { return symbol(sym.AFFECT); }
-"<"		      { return symbol(sym.INF); }
-">" 		      { return symbol(sym.SUP); }
-"="		      { return symbol(sym.EGAL); }
-"+"		      { return symbol(sym.PLUS); }
-"-"		      { return symbol(sym.INF); }
-"*"		      { return symbol(sym.MULT); }
-"/"		      { return symbol(sym.DIV); }
-"."		      { return symbol(sym.POINT); }
-"["		      { return symbol(sym.CROCH_OUVR); }
-"]"		      { return symbol(sym.CROCH_FERM); }
-","		      { return symbol(sym.VIRGULE); }
-":"		      { return symbol(sym.DEUX_POINTS); }
-"("		      { return symbol(sym.PAR_OUVR); }
-")"		      { return symbol(sym.PAR_FERM); }
-";"		      { return symbol(sym.POINT_VIRGULE); }
-".."		      { return symbol(sym.DOUBLE_POINT); }
-"/="		      { return symbol(sym.DIFF); }
-"<="		      { return symbol(sym.INF_EGAL); }
-">="		      { return symbol(sym.SUP_EGAL); }
 
 // ------------
-// A COMPLETER 
+// A COMPLETER
 // ------------

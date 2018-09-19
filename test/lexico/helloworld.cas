@@ -1,0 +1,5 @@
+--Fonction Helloworld 
+program
+begin 
+	write("Hello World!!!!") ; 
+end.
