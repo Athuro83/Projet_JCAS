@@ -229,6 +229,8 @@ import java.util.Hashtable;
 CHIFFRE        = [0-9]
 LETTRE         = [a-zA-Z]
 
+NUM 	       = CHIFFRE CHIFFRE*
+
 // ------------
 // A COMPLETER
 // ------------
