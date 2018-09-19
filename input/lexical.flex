@@ -237,7 +237,7 @@ INT            = {NUM}
 REEL           = {DEC}|{DEC}{EXP}
 CHAINE_CAR     = ""|"!"|[\043-\176]
 CHAINE         = \"({CHAINE_CAR}|(\"\"))*\"
-COMMENT        = "--"([\040-\176]|\t)*\n
+COMMENT        = "--"([\040-\176]|\t)*\t\n
 
 
 
@@ -279,7 +279,31 @@ COMMENT        = "--"([\040-\176]|\t)*\n
                             yytext() + "' non reconnu ... ligne " + 
                             numLigne()) ;
                          throw new ErreurLexicale() ; }
+// ------------
+// regles pour les symboles speciaux
+// ------------
+
+":="		      { return symbol(sym.AFFECT); }
+"<"		      { return symbol(sym.INF); }
+">" 		      { return symbol(sym.SUP); }
+"="		      { return symbol(sym.EGAL); }
+"+"		      { return symbol(sym.PLUS); }
+"-"		      { return symbol(sym.INF); }
+"*"		      { return symbol(sym.MULT); }
+"/"		      { return symbol(sym.DIV); }
+"."		      { return symbol(sym.POINT); }
+"["		      { return symbol(sym.CROCH_OUVR); }
+"]"		      { return symbol(sym.CROCH_FERM); }
+","		      { return symbol(sym.VIRGULE); }
+":"		      { return symbol(sym.DEUX_POINTS); }
+"("		      { return symbol(sym.PAR_OUVR); }
+")"		      { return symbol(sym.PAR_FERM); }
+";"		      { return symbol(sym.POINT_VIRGULE); }
+".."		      { return symbol(sym.DOUBLE_POINT); }
+"/="		      { return symbol(sym.DIFF); }
+"<="		      { return symbol(sym.INF_EGAL); }
+">="		      { return symbol(sym.SUP_EGAL); }
 
 // ------------
-// A COMPLETER
+// A COMPLETER 
 // ------------
