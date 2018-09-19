@@ -228,10 +228,20 @@ import java.util.Hashtable;
 
 CHIFFRE        = [0-9]
 LETTRE         = [a-zA-Z]
+NUM 	         = {CHIFFRE}{CHIFFRE}*
+IDF            = {LETTRE}({LETTRE}|{CHIFFRE}|'_')*
+SIGNE          = '+'|'-'|''
+EXP            = ('E'{SIGNE}{NUM})|('e'{SIGNE}{NUM})
+DEC            = {NUM}'.'{NUM}
+INT            = {NUM}
+REEL           = {DEC}|{DEC}{EXP}
+CHAINE_CAR     = ""|"!"|[\043-\176]
+CHAINE         = \"({CHAINE_CAR}|(\"\"))*\"
 
-NUM 	       = {CHIFFRE}{CHIFFRE}*
 
-IDF          = {LETTRE}({LETTRE}|{CHIFFRE}|'_')*
+
+
+
 
 // ------------
 // A COMPLETER
