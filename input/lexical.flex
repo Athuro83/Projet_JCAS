@@ -237,7 +237,7 @@ INT            = {NUM}
 REEL           = {DEC}|{DEC}{EXP}
 CHAINE_CAR     = ""|"!"|[\043-\176]
 CHAINE         = \"({CHAINE_CAR}|(\"\"))*\"
-COMMENT        = "--"([\040-\176]|\t)*\n
+COMMENT        = "--"([\040-\176]|\t)*\t\n
 
 
 
