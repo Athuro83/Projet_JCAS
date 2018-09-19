@@ -228,7 +228,7 @@ import java.util.Hashtable;
 
 CHIFFRE        = [0-9]
 LETTRE         = [a-zA-Z]
-NUM 	         = {CHIFFRE}{CHIFFRE}*
+NUM 	       = {CHIFFRE}{CHIFFRE}*
 IDF            = {LETTRE}({LETTRE}|{CHIFFRE}|'_')*
 SIGNE          = '+'|'-'|''
 EXP            = ('E'{SIGNE}{NUM})|('e'{SIGNE}{NUM})
@@ -263,12 +263,12 @@ COMMENT        = "--"([\040-\176]|\t)*\t\n
 // Reconnaissance des identificateurs et des mots réservés
 {IDF}                  { 
                          Integer keyword = dictionnaire.get(yytext());
-                         if(keyword != NULL){
+                         if(keyword != null){
                             // On a trouvé un mot clé du langage
                             return symbol(keyword);
                          }
                          // On a trouvé un identificateur
-                         return symbol(sym.IDF, yytext())
+                         return symbol(sym.IDF, yytext());
                        }
 // ------------
 // regles pour les symboles speciaux
@@ -300,6 +300,4 @@ COMMENT        = "--"([\040-\176]|\t)*\t\n
                             yytext() + "' non reconnu ... ligne " + 
                             numLigne()) ;
                          throw new ErreurLexicale() ; }
-// ------------
-// A COMPLETER 
-// ------------
+
