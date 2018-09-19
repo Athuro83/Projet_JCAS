@@ -270,15 +270,6 @@ COMMENT        = "--"([\040-\176]|\t)*\t\n
                          // On a trouvé un identificateur
                          return symbol(sym.IDF, yytext())
                        }
-
-
-
-"+"                    { return symbol(sym.PLUS); }
-
-.                      { System.out.println("Erreur Lexicale : '" +
-                            yytext() + "' non reconnu ... ligne " + 
-                            numLigne()) ;
-                         throw new ErreurLexicale() ; }
 // ------------
 // regles pour les symboles speciaux
 // ------------
@@ -304,6 +295,11 @@ COMMENT        = "--"([\040-\176]|\t)*\t\n
 "<="		      { return symbol(sym.INF_EGAL); }
 ">="		      { return symbol(sym.SUP_EGAL); }
 
+// Erreur lexicale
+.                      { System.out.println("Erreur Lexicale : '" +
+                            yytext() + "' non reconnu ... ligne " + 
+                            numLigne()) ;
+                         throw new ErreurLexicale() ; }
 // ------------
 // A COMPLETER 
 // ------------
