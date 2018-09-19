@@ -247,9 +247,6 @@ IDF          = {LETTRE}({LETTRE}|{CHIFFRE}|'_')*
 
 \n                     { }
 
-// On ignore les commentaires
-{COMMENT}              { }
-
 // Reconnaissance des identificateurs et des mots réservés
 {IDF}                  { 
                          Integer keyword = dictionnaire.get(yytext());
