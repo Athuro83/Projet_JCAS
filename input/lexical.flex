@@ -231,6 +231,8 @@ LETTRE         = [a-zA-Z]
 
 NUM 	       = CHIFFRE CHIFFRE*
 
+IDF          = LETTRE (LETTRE + CHIFFRE + ' ')*
+
 // ------------
 // A COMPLETER
 // ------------
