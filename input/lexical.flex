@@ -237,7 +237,7 @@ INT            = {NUM}
 REEL           = {DEC}|{DEC}{EXP}
 CHAINE_CAR     = ""|"!"|[\043-\176]
 CHAINE         = \"({CHAINE_CAR}|(\"\"))*\"
-
+COMMENT        = "--"([\040-\176]|\t)*\n
 
 
 
@@ -256,20 +256,6 @@ CHAINE         = \"({CHAINE_CAR}|(\"\"))*\"
 [ \t]+                 { }
 
 \n                     { }
-
-// On ignore les commentaires
-{COMMENT}              { }
-
-// Reconnaissance des identificateurs et des mots réservés
-{IDF}                  { 
-                         Integer keyword = dictionnaire.get(yytext());
-                         if(keyword != NULL){
-                            // On a trouvé un mot clé du langage
-                            return symbol(keyword);
-                         }
-                         // On a trouvé un identificateur
-                         return symbol(sym.IDF, yytext())
-                       }
 
 "+"                    { return symbol(sym.PLUS); }
 
