@@ -229,9 +229,9 @@ import java.util.Hashtable;
 CHIFFRE        = [0-9]
 LETTRE         = [a-zA-Z]
 
-NUM 	       = CHIFFRE CHIFFRE*
+NUM 	       = {CHIFFRE}{CHIFFRE}*
 
-IDF          = LETTRE (LETTRE + CHIFFRE + ' ')*
+IDF          = {LETTRE}({LETTRE}|{CHIFFRE}|'_')*
 
 // ------------
 // A COMPLETER
