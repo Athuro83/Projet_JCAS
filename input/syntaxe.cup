@@ -155,27 +155,27 @@ decl ::= liste_idf DEUX_POINTS type
       
    :}
    ;
-liste_idf ::= liste_idf VIRGULE idf
+liste_idf ::= liste_idf:i1 VIRGULE idf:i2
    {: 
-      
+      RESULT = Arbre.creation2(Noeud.ListeIdent, i1, i2, i2.getNumLigne());
    :}
-   |  idf
+   |  idf:i1
    {:
-      
+      RESULT = Arbre.creation2(Noeud.ListeIdent, Noeud.Vide, i1, i1.getNumLigne());
    :}
    ;
 
-type ::= idf
+type ::= idf:i1
    {:
-      
+      RESULT = Arbre.creation0(i1, i1.getNumLigne());
    :}
-   |  type_intervalle
+   |  type_intervalle:t1
    {:
-      
+      RESULT = Arbre.creation0(t1, t1.getNumLigne());
    :}
-   |  ARRAY CROCH_OUVR type_intervalle CROCH_FERM OF type
+   |  ARRAY CROCH_OUVR type_intervalle:t1 CROCH_FERM OF type:t2
    {:
-      
+      RESULT = Arbre.creation2(Noeud.Tableau, t1, t2, t2.getNumLigne());
    :}
    ;
 
