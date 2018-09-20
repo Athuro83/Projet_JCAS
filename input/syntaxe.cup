@@ -210,7 +210,7 @@ const ::= CONST_ENT
    ;
 idf ::= IDF
    {:
-      
+      RESULT = Arbre.creation0(Noeud.Ident, parser.numLigne());
    :}
    ;
 
@@ -380,10 +380,11 @@ facteur ::= CONST_ENT
 
 place ::= idf
    {:
-      
+      RESULT = Arbre.creation0(Noeud.Ident, parser.numLigne());
    :}
-   |  place CROCH_OUVR exp CROCH_FERM
+   |  place:a1 CROCH_OUVR exp:a2 CROCH_FERM
    {:
-      
+      RESULT = Arbre.creation2(Noeud.Index, a1, a2 , a2.get.NumLigne());
    :}
    ;
+
