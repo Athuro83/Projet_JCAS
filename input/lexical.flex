@@ -229,15 +229,15 @@ import java.util.Hashtable;
 CHIFFRE        = [0-9]
 LETTRE         = [a-zA-Z]
 NUM 	       = {CHIFFRE}{CHIFFRE}*
-IDF            = {LETTRE}({LETTRE}|{CHIFFRE}|'_')*
-SIGNE          = '+'|'-'|''
+IDF            = {LETTRE}({LETTRE}|{CHIFFRE}|"_")*
+SIGNE          = "+"|"-"|""
 EXP            = ('E'{SIGNE}{NUM})|('e'{SIGNE}{NUM})
-DEC            = {NUM}'.'{NUM}
+DEC            = {NUM}"."{NUM}
 INT            = {NUM}
 REEL           = {DEC}|{DEC}{EXP}
-CHAINE_CAR     = ""|"!"|[\043-\176]
+CHAINE_CAR     = " "|"!"|[\043-\176]
 CHAINE         = \"({CHAINE_CAR}|(\"\"))*\"
-COMMENT        = "--"([\040-\176]|\t)*\t\n
+COMMENT        = "--"([\040-\176]|\t)*
 
 
 
@@ -270,6 +270,30 @@ COMMENT        = "--"([\040-\176]|\t)*\t\n
                          // On a trouvé un identificateur
                          return symbol(sym.IDF, yytext());
                        }
+
+// Constantes entières
+{INT}                  {
+                         try {
+                             return symbol(sym.CONST_ENT, new Integer(yytext()));
+                         } catch( NumberFormatException e ){
+                             System.out.println("Impossible de convertir [" + yytext() + "] en entier.");
+                             throw new ErreurLexicale();
+                         }
+                       }
+
+// Constantes réelles
+{REEL}                 {
+                         try {
+                             return symbol(sym.CONST_REEL, new Float(yytext()));
+                         } catch( NumberFormatException e ){
+                             System.out.println("Impossible de convertir [" + yytext() + "] en réel.");
+                             throw new ErreurLexicale();
+                         }
+                       }
+
+// Chaînes de caractères
+{CHAINE}              { return symbol(sym.CONST_CHAINE, yytext()); }
+
 // ------------
 // regles pour les symboles speciaux
 // ------------
