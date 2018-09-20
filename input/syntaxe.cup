@@ -179,33 +179,33 @@ type ::= idf
    :}
    ;
 
-type_intervalle ::= constante DOUBLE_POINT constante
+type_intervalle ::= constante:c1 DOUBLE_POINT constante:c2
    {:
-      
+	RESULT = Arbre.creation2(Noeud.Intervalle, c1, c2, c2.getNumLigne());
    :}
    ;
 
-constante ::= PLUS const
+constante ::= PLUS const:c1
    {:
-      
+   	RESULT = Arbre.creation1(Noeud.PlusUnaire, c1, c1.getNumLigne()); 
    :}
-   |  MOINS const
+   |  MOINS const:c1
    {: 
-      
+     	RESULT = Arbre.creation1(Noeud.MoinsUnaire, c1, c1.getNumLigne()); 
    :}
-   |  const
+   |  const:c1
    {:
-      
+     	RESULT = Arbre.creation1(Noeud.PlusUnaire, c1, c1.getNumLigne()); 
    :}
    ;
 
 const ::= CONST_ENT
    {:
-      
+     	RESULT = Arbre.creation0(Noeud.Entier); 
    :}
-   |  idf
+   |  idf:a1
    {:
-      
+     	RESULT = Arbre.creation1(a1, a1.getNumLigne()); 
    :}
    ;
 idf ::= IDF
@@ -214,61 +214,61 @@ idf ::= IDF
    :}
    ;
 
-liste_inst ::= liste_inst inst POINT_VIRGULE
+liste_inst ::= liste_inst:l1 inst:i1 POINT_VIRGULE
    {: 
-      
+     	RESULT = Arbre.creation2(Noeud.ListeInst, l1, i1, i1.getNumLigne());
    :}
-   |  inst POINT_VIRGULE
+   |  inst:i1 POINT_VIRGULE
    {:
-      
+     	RESULT = Arbre.creation1(i1, i1.getNumLigne());
    :}
    ;
 
 inst ::= NULL
    {:
-
+	RESULT = Arbre.creation0(Noeud.Nop);
    :}
-   |  place AFFECT exp
+   |  place:p1 AFFECT exp:e1
    {:
-      
+     	RESULT = Arbre.creation2(Noeud.Affect, p1, e1, e1.getNumLigne()); 
    :}
-   |  FOR pas DO liste_inst END
+   |  FOR pas:p1 DO liste_inst:l1 END
    {:
-      
+     	RESULT = Arbre.creation2(Noeud.Pour, p1, l1, p1.getNumLigne()); 
    :}
-   |  WHILE exp DO liste_inst END
+   |  WHILE exp:e1 DO liste_inst:l1 END
    {:
-      
+     	RESULT = Arbre.creation2(Noeud.TantQue, e1, l1, e1.getNumLigne()); 
    :}
-   |  IF exp THEN liste_inst END
+   |  IF exp:e1 THEN liste_inst:l1 END
    {:
-      
+     	RESULT = Arbre.creation2(Noeud.Si, e1, l1, e1.getNumLigne());
    :}
-   |  IF exp THEN liste_inst ELSE liste_inst END
+   |  IF exp:e1 THEN liste_inst:l1 ELSE liste_inst:l2 END
    {:
-      
+     	RESULT = Arbre.creation3(Noeud.Si, e1, l1, l2, e1.getNumLigne()); 
    :}
-   |  WRITE PAR_OUVR liste_exp PAR_FERM
+   |  WRITE PAR_OUVR liste_exp:l1 PAR_FERM
    {:
-      
+     	RESULT = Arbre.creation1(Noeud.Ecriture, l1); 
    :}
-   |  READ PAR_OUVR place PAR_FERM
+   |  READ PAR_OUVR place:p PAR_FERM
    {:
-      
+     	RESULT = Arbre.creation1(Noeud.Lecture, p); 
    :}
    |  NEW_LINE
    {:
-      
+     	RESULT = Arbre.creation0(Noeud.Ligne); 
    :}
    ;
 
-pas ::= idf AFFECT exp TO exp
+pas ::= idf:i1 AFFECT exp:e1 TO exp:e2 
    {:
-      
+     	RESULT = Arbre.creation1(Noeud.Increment, i1, e1, e2, e2.getNumLigne());
    :}
-   |  idf AFFECT exp DOWNTO exp
+   |  idf:i1 AFFECT exp:e1 DOWNTO exp:e2
    {: 
-      
+     	RESULT = Arbre.creation1(Noeud.Decrement, i1, e1, e2, e2.getNumLigne()); 
    :}
    ;
 
