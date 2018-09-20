@@ -150,32 +150,32 @@ liste_decl ::= liste_decl:a1 decl:a2 POINT_VIRGULE
 
 
 
-decl ::= liste_idf DEUX_POINTS type
+decl ::= liste_idf:a1 DEUX_POINTS type:a2
    {:
-      
+      RESULT = Arbre.creation2(Noeud.Decl, a1, a2, a2.getNumLigne());
    :}
    ;
-liste_idf ::= liste_idf VIRGULE idf
+liste_idf ::= liste_idf:i1 VIRGULE idf:i2
    {: 
-      
+      RESULT = Arbre.creation2(Noeud.ListeIdent, i1, i2, i2.getNumLigne());
    :}
-   |  idf
+   |  idf:i1
    {:
-      
+      RESULT = Arbre.creation2(Noeud.ListeIdent, Noeud.Vide, i1, i1.getNumLigne());
    :}
    ;
 
-type ::= idf
+type ::= idf:i1
    {:
-      
+      RESULT = Arbre.creation0(i1, i1.getNumLigne());
    :}
-   |  type_intervalle
+   |  type_intervalle:t1
    {:
-      
+      RESULT = Arbre.creation0(t1, t1.getNumLigne());
    :}
-   |  ARRAY CROCH_OUVR type_intervalle CROCH_FERM OF type
+   |  ARRAY CROCH_OUVR type_intervalle:t1 CROCH_FERM OF type:t2
    {:
-      
+      RESULT = Arbre.creation2(Noeud.Tableau, t1, t2, t2.getNumLigne());
    :}
    ;
 
@@ -210,7 +210,7 @@ const ::= CONST_ENT
    ;
 idf ::= IDF
    {:
-      
+      RESULT = Arbre.creation0(Noeud.Ident, parser.numLigne());
    :}
    ;
 
@@ -272,103 +272,103 @@ pas ::= idf:i1 AFFECT exp:e1 TO exp:e2
    :}
    ;
 
-liste_exp ::= liste_exp VIRGULE exp
+liste_exp ::= liste_exp:a1 VIRGULE exp:a2
    {:
-      
+      RESULT = Arbre.creation2(Noeud.ListeExp, a1, a2, a2.getNumLigne());
    :}
-   |  exp
+   |  exp:a1
    {:
-      
+       RESULT = Arbre.creation2(Noeud.ListeExp, Noeud.Vide, a1, a1.getNumLigne());
    :}
    ;
    
-exp ::= facteur
+exp ::= facteur:a1
    {:
-      
+      RESULT = Arbre.creation1(Noeud.PlusUnaire, a1, a1.getNumLigne());
    :}
-   |  exp AND exp
+   |  exp:a1 AND exp:a2
    {:
-      
+      RESULT = Arbre.creation2(Noeud.Et, a1, a2, a2.getNumLigne());
    :}
-   |  exp OR exp
+   |  exp:a1 OR exp:a2
    {:
-      
+      RESULT = Arbre.creation2(Noeud.Ou, a1, a2, a2.getNumLigne());
    :}
-   |  exp EGAL exp
+   |  exp:a1 EGAL exp:a2
    {:
-      
+      RESULT = Arbre.creation2(Noeud.Egal, a1, a2, a2.getNumLigne());
    :}
-   |  exp INF_EGAL exp
+   |  exp:a1 INF_EGAL exp:a2
    {:
-      
+      RESULT = Arbre.creation2(Noeud.InfEgal, a1, a2, a2.getNumLigne());
    :}
-   |  exp SUP_EGAL exp
+   |  exp:a1 SUP_EGAL exp:a2
    {:
-      
+      RESULT = Arbre.creation2(Noeud.SupEgal, a1, a2, a2.getNumLigne());
    :}
-   |  exp DIFF exp
+   |  exp:a1 DIFF exp:a2
    {:
-      
+      RESULT = Arbre.creation2(Noeud.NonEgal, a1, a2, a2.getNumLigne());
    :}
-   |  exp INF exp
+   |  exp:a1 INF exp:a2
    {:
-      
+      RESULT = Arbre.creation2(Noeud.Inf, a1, a2, a2.getNumLigne());
    :}
-   |  exp SUP exp
+   |  exp:a1 SUP exp:a2
    {:
-      
+      RESULT = Arbre.creation2(Noeud.Sup, a1, a2, a2.getNumLigne());
    :}
-   |  exp PLUS exp
+   |  exp:a1 PLUS exp:a2
    {:
-      
+      RESULT = Arbre.creation2(Noeud.Plus, a1, a2, a2.getNumLigne());
    :}
-   |  exp MOINS exp
+   |  exp:a1 MOINS exp:a2
    {:
-      
+      RESULT = Arbre.creation2(Noeud.Moins, a1, a2, a2.getNumLigne());
    :}
-   |  exp MULT exp
+   |  exp:a1 MULT exp:a2
    {:
-      
+      RESULT = Arbre.creation2(Noeud.Mult, a1, a2, a2.getNumLigne());
    :}
-   |  exp DIV_REEL exp
+   |  exp:a1 DIV_REEL exp:a2
    {:
-      
+      RESULT = Arbre.creation2(Noeud.DivReel, a1, a2, a2.getNumLigne());
    :}
-   |  exp MOD exp
+   |  exp:a1 MOD exp:a2
    {:
-      
+      RESULT = Arbre.creation2(Noeud.Reste, a1, a2, a2.getNumLigne());
    :}
-   |  exp DIV exp
+   |  exp:a1 DIV exp:a2
    {:
-      
+      RESULT = Arbre.creation2(Noeud.Quotient, a1, a2, a2.getNumLigne());
    :}
-   |  PLUS facteur
+   |  PLUS facteur:a1
    {: 
-      
+      RESULT = Arbre.creation1(Noeud.PlusUnaire, a1, a1.getNumLigne());
    :}
-   |  MOINS facteur
+   |  MOINS facteur:a1
    {: 
-      
+      RESULT = Arbre.creation1(Noeud.MoinsUnaire, a1, a1.getNumLigne());
    :}
-   |  NOT facteur
+   |  NOT facteur:a1
    {: 
-      
+      RESULT = Arbre.creation1(Noeud.Non, a1, a1.getNumLigne());
    :}
    ;
 
 facteur ::= CONST_ENT
    {:
-      
+      RESULT = Arbre.creation0(Noeud.Entier, parser.numLigne())
    :}
    |  CONST_REEL
    {: 
-      
+      RESULT = Arbre.creation0(Noeud.Reel, parser.numLigne())
    :}
    |  CONST_CHAINE
    {:
-      
+      RESULT = Arbre.creation0(Noeud.Chaine, parser.numLigne())
    :}
-   |  place
+   |  place:a1
    {:
       
    :}
@@ -380,10 +380,11 @@ facteur ::= CONST_ENT
 
 place ::= idf
    {:
-      
+      RESULT = Arbre.creation0(Noeud.Ident, parser.numLigne());
    :}
-   |  place CROCH_OUVR exp CROCH_FERM
+   |  place:a1 CROCH_OUVR exp:a2 CROCH_FERM
    {:
-      
+      RESULT = Arbre.creation2(Noeud.Index, a1, a2 , a2.get.NumLigne());
    :}
    ;
+
