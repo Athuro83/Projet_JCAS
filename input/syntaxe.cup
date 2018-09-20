@@ -358,15 +358,15 @@ exp ::= facteur:a1
 
 facteur ::= CONST_ENT
    {:
-      RESULT = Arbre.creation0(Noeud.Entier, parser.numLigne())
+      RESULT = Arbre.creation0(Noeud.Entier, parser.numLigne());
    :}
    |  CONST_REEL
    {: 
-      RESULT = Arbre.creation0(Noeud.Reel, parser.numLigne())
+      RESULT = Arbre.creation0(Noeud.Reel, parser.numLigne());
    :}
    |  CONST_CHAINE
    {:
-      RESULT = Arbre.creation0(Noeud.Chaine, parser.numLigne())
+      RESULT = Arbre.creation0(Noeud.Chaine, parser.numLigne());
    :}
    |  place:a1
    {:
