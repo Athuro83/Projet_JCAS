@@ -167,11 +167,11 @@ liste_idf ::= liste_idf:i1 VIRGULE idf:i2
 
 type ::= idf:i1
    {:
-      RESULT = Arbre.creation1(Noeud.Ident, i1, i1.getNumLigne());
+      RESULT = i1;
    :}
    |  type_intervalle:t1
    {:
-      RESULT = Arbre.creation1(Noeud.Intervalle, t1, t1.getNumLigne());
+      RESULT = t1;
    :}
    |  ARRAY CROCH_OUVR type_intervalle:t1 CROCH_FERM OF type:t2
    {:
@@ -195,22 +195,22 @@ constante ::= PLUS const:c1
    :}
    |  const:c1
    {:
-     	RESULT = Arbre.creation1(Noeud.PlusUnaire, c1, c1.getNumLigne()); 
+     	RESULT = c1;
    :}
    ;
 
-const ::= CONST_ENT
+const ::= CONST_ENT:e1
    {:
-     	RESULT = Arbre.creation0(Noeud.Entier, parser.numLigne());
+     	RESULT = Arbre.creationEntier(e1, parser.numLigne());
    :}
    |  idf:a1
    {:
-     	RESULT = Arbre.creation1(Noeud.Ident, a1, a1.getNumLigne()); 
+     	RESULT = a1;
    :}
    ;
-idf ::= IDF
+idf ::= IDF:i1
    {:
-      RESULT = Arbre.creation0(Noeud.Ident, parser.numLigne());
+      RESULT = Arbre.creationIdent(i1, parser.numLigne());
    :}
    ;
 
@@ -278,13 +278,13 @@ liste_exp ::= liste_exp:a1 VIRGULE exp:a2
    :}
    |  exp:a1
    {:
-       RESULT = Arbre.creation1(Noeud.ListeExp, a1, a1.getNumLigne());
+       RESULT = Arbre.creation2(Noeud.ListeExp, Arbre.creation0(Noeud.Vide, parser.numLigne()), a1, a1.getNumLigne());
    :}
    ;
    
 exp ::= facteur:a1
    {:
-      RESULT = Arbre.creation1(Noeud.PlusUnaire, a1, a1.getNumLigne());
+      RESULT = a1;
    :}
    |  exp:a1 AND exp:a2
    {:
@@ -356,31 +356,31 @@ exp ::= facteur:a1
    :}
    ;
 
-facteur ::= CONST_ENT
+facteur ::= CONST_ENT:e1
    {:
-      RESULT = Arbre.creation0(Noeud.Entier, parser.numLigne());
+      RESULT = Arbre.creationEntier(e1, parser.numLigne());
    :}
-   |  CONST_REEL
+   |  CONST_REEL:r1
    {: 
-      RESULT = Arbre.creation0(Noeud.Reel, parser.numLigne());
+      RESULT = Arbre.creationReel(r1, parser.numLigne());
    :}
-   |  CONST_CHAINE
+   |  CONST_CHAINE:c1
    {:
-      RESULT = Arbre.creation0(Noeud.Chaine, parser.numLigne());
+      RESULT = Arbre.creationChaine(c1, parser.numLigne());
    :}
    |  place:a1
    {:
-      
+      RESULT = a1;
    :}
-   |  PAR_OUVR exp PAR_FERM
+   |  PAR_OUVR exp:e1 PAR_FERM
    {:
-      
+      RESULT = e1;
    :}
    ;
 
-place ::= idf
+place ::= idf:i1
    {:
-      RESULT = Arbre.creation0(Noeud.Ident, parser.numLigne());
+      RESULT = i1;
    :}
    |  place:a1 CROCH_OUVR exp:a2 CROCH_FERM
    {:

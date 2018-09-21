@@ -292,7 +292,7 @@ COMMENT        = "--"([\040-\176]|\t)*
                        }
 
 // Chaînes de caractères
-{CHAINE}              { return symbol(sym.CONST_CHAINE, yytext()); }
+{CHAINE}              { return symbol(sym.CONST_CHAINE, yytext().substring(1, yytext().length()-1)); }
 
 // ------------
 // regles pour les symboles speciaux
