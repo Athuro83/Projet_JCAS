@@ -1,0 +1,22 @@
+-- tri un tableau avec l'algo de tri a bulle 
+program 
+   T : array [1 .. 20] of integer ;
+   i : 1 .. 20 ;
+   j : 1 .. 20 ; 
+   a : integer ;
+
+begin 
+
+    i := 20;
+
+    while ( i>=1) do  
+      for j := 1 to 20 do
+         if T[j+1]<T[j] then 
+            a = T[j+1] ; 
+            T[j+1] = T[j] ;
+            T[j] = a ; 
+         end;
+      end;
+      i := i-1 ;
+    end; 
+end.
