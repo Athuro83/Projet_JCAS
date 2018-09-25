@@ -12,9 +12,9 @@ begin
     while ( i>=1) do  
       for j := 1 to 20 do
          if T[j+1]<T[j] then 
-            a = T[j+1] ; 
-            T[j+1] = T[j] ;
-            T[j] = a ; 
+            a := T[j+1] ; 
+            T[j+1] := T[j] ;
+            T[j] := a ; 
          end;
       end;
       i := i-1 ;
