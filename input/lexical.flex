@@ -262,13 +262,13 @@ COMMENT        = "--"([\040-\176]|\t)*
 
 // Reconnaissance des identificateurs et des mots réservés
 {IDF}                  { 
-                         Integer keyword = dictionnaire.get(yytext());
+                         Integer keyword = dictionnaire.get(yytext().toLowerCase());
                          if(keyword != null){
                             // On a trouvé un mot clé du langage
                             return symbol(keyword);
                          }
                          // On a trouvé un identificateur
-                         return symbol(sym.IDF, yytext());
+                         return symbol(sym.IDF, yytext().toLowerCase());
                        }
 
 // Constantes entières
