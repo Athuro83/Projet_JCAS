@@ -40,9 +40,29 @@ public class Verif {
       def = Defn.creationType(Type.Integer);
       def.setGenre(Genre.PredefInteger);
       env.enrichir("integer", def);
+      //boolean
+      def = Defn.creationType(Type.Boolean);
+      def.setGenre(Genre.PredefBoolean);
+      env.enrichir("boolean", def);
+      //false
+      def = Defn.creationType(Type.Boolean);
+      def.setGenre(Genre.PredefFalse);
+      env.enrichir("false", def);
+      //true
+      def = Defn.creationType(Type.Boolean);
+      def.setGenre(Genre.PredefTrue);
+      env.enrichir("true", def);
+      //max_int
+      def = Defn.creationType(Type.Integer);
+      def.setGenre(Genre.PredefMaxInt);
+      env.enrichir("max_int", def);
+      //real
+      def = Defn.creationType(Type.Real);
+      def.setGenre(Genre.PredefReal);
+      env.enrichir("real", def);
       
       // ------------
-      // A COMPLETER
+      // DONE
       // ------------
    }
 
