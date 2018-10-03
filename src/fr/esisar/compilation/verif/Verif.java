@@ -16,6 +16,8 @@ public class Verif {
    public Verif() {
       env = new Environ();
    }
+   	
+   /*bonsoiir*/
 
    /**
     * Vérifie les contraintes contextuelles du programme correspondant à 
