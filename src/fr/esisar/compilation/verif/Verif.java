@@ -86,9 +86,23 @@ public class Verif {
     * LISTE_INST
     **************************************************************************/
    private void verifier_LISTE_INST(Arbre a) throws ErreurVerif {
+	   switch(a.getNoeud()) {
+   	      case Vide:
+   	    	  break;
+   	      case ListeInst:
+   	    	  verifier_LISTE_INST(a.getFils1());
+   	    	  verifier_INST(a.getFils2());
+   	    	  break;
+   	      default:
+   	    	  throw new ErreurInterneVerif("Arbre incorrect dans verifier_LISTE_INST");
+	   }
       // A COMPLETER
    }
 
+   private void verifier_INST(Arbre a) throws ErreurVerif {
+	      // A COMPLETER
+   }
+   
    // ------------------------------------------------------------------------
    // COMPLETER les operations de vérifications et de décoration pour toutes 
    // les constructions d'arbres
