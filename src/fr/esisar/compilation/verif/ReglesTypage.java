@@ -92,7 +92,149 @@ public class ReglesTypage {
 
    static ResultatBinaireCompatible binaireCompatible
       (Noeud noeud, Type t1, Type t2) {
-      return null;
+	   
+	   ResultatBinaireCompatible result = new ResultatBinaireCompatible();
+	   /* On assume par défaut que la conversion n'est pas nécessaire */
+	   result.setConv1(false);
+	   result.setConv2(false);
+	   
+	   	switch(noeud){
+	   		
+	   		case Et:
+	   		case Ou:
+	   			/* Résultat de type booléen si les deux opérandes sont booléens */
+	   			if(t1.getNature() != NatureType.Boolean){
+	   				/* ERREUR : Op1 invalide */
+	   			}
+	   			else if(t2.getNature() != NatureType.Boolean){
+	   				/* ERREUR : Op2 invalide */
+	   			}
+	   			
+	   			result.setOk(true);
+	   			result.setTypeRes(Type.Boolean);
+	   			break;
+	   
+	   		case Egal:
+	   		case Inf:
+	   		case Sup:
+	   		case NonEgal:
+	   		case SupEgal:
+	   		case InfEgal:
+	   			/* Le résultat est booléen */
+	   			/* On commence par examiner le type du premier opérande */
+	   			switch(t1.getNature()){
+	   			
+	   				case Interval:
+	   					/* Types autorisés pour l'opérande 2 : Interval ou Real */
+	   					switch(t2.getNature()){
+	   					
+	   						case Real:
+	   							/* Conversion nécessaire de l'Interval en Real */
+	   							result.setConv1(true);
+		   					case Interval:
+		   						result.setOk(true);
+		   						result.setTypeRes(Type.Boolean);
+		   						break;
+		   						
+	   						default:
+	   							/* ERREUR : Op2 invalide */
+	   					}
+	   					break;
+	   					
+	   				case Real:
+	   					/* Types autorisés pour l'opérande 2 : Interval ou Real */
+	   					switch(t2.getNature()){
+	   					
+	   						case Interval:
+	   							/* Conversion nécessaire de l'Interval en Real */
+	   							result.setConv2(true);
+		   					case Real:
+		   						result.setOk(true);
+		   						result.setTypeRes(Type.Boolean);
+		   						break;
+		   						
+	   						default:
+	   							/* ERREUR : Op2 invalide */
+	   					}
+	   					break;
+	   					
+	   				default:
+	   					/* ERREUR : Op1 invalide */
+	   			}
+	   			break;
+	   			
+	   		case Plus:
+	   		case Moins:
+	   		case Mult:
+	   			/* On commence par examiner le type du premier opérande */
+	   			switch(t1.getNature()){
+	   				
+	   				case Interval:
+	   					/* Types autorisés pour l'opérande 2 : Interval ou Real */
+	   					switch(t2.getNature()){
+	   						
+		   					case Interval:
+		   						/* Les deux opérandes sont de type Interval : Sortie de type Interval */
+		   						result.setOk(true);
+		   						result.setTypeRes(Type.Integer);
+		   						break;
+		   						
+		   					case Real:
+		   						/* Conversion de l'opérande 1 nécessaire */
+		   						result.setConv1(true);
+		   						result.setOk(true);
+		   						result.setTypeRes(Type.Real);
+		   						break;
+		   						
+		   					default:
+		   						/* ERREUR : Op2 invalide */
+	   					}
+	   					break;
+	   					
+	   				case Real:
+	   					/* Types autorisés pour l'opérande 2 : Interval ou Real */
+	   					switch(t2.getNature()){
+	   						
+		   					case Interval:
+		   						/* Conversion de l'opérande 2 nécessaire */
+		   						result.setConv2(true);
+		   					case Real:
+		   						result.setOk(true);
+		   						result.setTypeRes(Type.Real);
+		   						break;
+		   						
+		   					default:
+		   						/* ERREUR : Op2 invalide */
+	   					}
+	   					break;
+	   					
+	   				default:
+	   					/* ERREUR : Op1 invalide */
+	   			}
+	   			break;
+	   			
+	   		case Quotient:
+	   		case Reste:
+	   			/* Opérations entre opérandes de type Interval seulement */
+	   			if(t1.getNature() != NatureType.Interval){
+	   				/* ERREUR : Op1 invalide */
+	   			}
+	   			else if(t2.getNature() != NatureType.Interval){
+	   				/* ERREUR : Op2 invalide */
+	   			}
+	   			
+	   			result.setOk(true);
+	   			result.setTypeRes(Type.Integer);
+	   			break;
+	   			
+	   		case DivReel:
+	   			break;
+	   			
+	   		default:
+	   			System.out.println("Unknow node");
+	   	}
+	   	
+	   	return result;
    }
 
    /**
