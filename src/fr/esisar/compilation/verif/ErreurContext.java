@@ -28,6 +28,9 @@ public enum ErreurContext {
 	ErreurOperandeNonArray,
 	ErreurOperande1NonArray,
 	ErreurOperande2NonArray,
+	ErreurOperandeNonNumerique,
+	ErreurOperande1NonNumerique,
+	ErreurOperande2NonNumerique,
 	ErreurIntervalNonCompatible,
 	ErreurAffectationIntervalAutre,
 	ErreurAffectationRealAutre,
@@ -91,6 +94,15 @@ public enum ErreurContext {
     	   break;
        case ErreurOperande2NonArray :
     	   System.err.println("L'operande 2 devrait etre un Array");
+    	   break;
+       case ErreurOperandeNonNumerique :
+    	   System.err.println("L'operande devrait etre un Real ou un Interval");
+    	   break;
+       case ErreurOperande1NonNumerique :
+    	   System.err.println("L'operande 1 devrait etre un Real ou un Interval");
+    	   break;
+       case ErreurOperande2NonNumerique :
+    	   System.err.println("L'operande 2 devrait etre un Real ou un Interval");
     	   break;
        case ErreurIntervalNonCompatible :
     	   System.err.println("L'Interval doit etre defini par deux Interval ");

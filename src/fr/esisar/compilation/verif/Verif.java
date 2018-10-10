@@ -79,7 +79,17 @@ public class Verif {
     * LISTE_DECL
     **************************************************************************/
    private void verifier_LISTE_DECL(Arbre a) throws ErreurVerif {
-      // A COMPLETER
+	   switch(a.getNoeud()) {
+	   case Vide:
+		   break;
+	   case ListeDecl:
+		   verifier_LISTE_DECL(a.getFils1());
+		   verifier_DECL(a.getFils2());
+		   break;
+	   default:
+	    	  throw new ErreurInterneVerif("Arbre incorrect dans verifier_LISTE_DECL");
+	   }
+	   
    }
 
    /**************************************************************************
