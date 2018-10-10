@@ -106,9 +106,14 @@ public class ReglesTypage {
 	   			/* Résultat de type booléen si les deux opérandes sont booléens */
 	   			if(t1.getNature() != NatureType.Boolean){
 	   				/* ERREUR : Op1 invalide */
+	   				result.setOk(false);
+	   				result.setConv1(true);
+	   				break;
 	   			}
 	   			else if(t2.getNature() != NatureType.Boolean){
 	   				/* ERREUR : Op2 invalide */
+	   				result.setOk(false);
+	   				result.setConv2(true);
 	   			}
 	   			
 	   			result.setOk(true);
@@ -140,6 +145,8 @@ public class ReglesTypage {
 		   						
 	   						default:
 	   							/* ERREUR : Op2 invalide */
+	   							result.setOk(false);
+	   							result.setConv2(true);
 	   					}
 	   					break;
 	   					
@@ -156,11 +163,15 @@ public class ReglesTypage {
 		   						
 	   						default:
 	   							/* ERREUR : Op2 invalide */
+	   							result.setOk(false);
+	   							result.setConv2(true);
 	   					}
 	   					break;
 	   					
 	   				default:
 	   					/* ERREUR : Op1 invalide */
+	   					result.setOk(false);
+	   					result.setConv1(true);
 	   			}
 	   			break;
 	   			
@@ -189,6 +200,8 @@ public class ReglesTypage {
 		   						
 		   					default:
 		   						/* ERREUR : Op2 invalide */
+		   						result.setOk(false);
+		   						result.setConv2(true);
 	   					}
 	   					break;
 	   					
@@ -206,11 +219,15 @@ public class ReglesTypage {
 		   						
 		   					default:
 		   						/* ERREUR : Op2 invalide */
+		   						result.setOk(false);
+		   						result.setConv2(true);
 	   					}
 	   					break;
 	   					
 	   				default:
 	   					/* ERREUR : Op1 invalide */
+	   					result.setOk(false);
+	   					result.setConv1(true);
 	   			}
 	   			break;
 	   			
@@ -219,9 +236,15 @@ public class ReglesTypage {
 	   			/* Opérations entre opérandes de type Interval seulement */
 	   			if(t1.getNature() != NatureType.Interval){
 	   				/* ERREUR : Op1 invalide */
+	   				result.setOk(false);
+	   				result.setConv1(true);
+	   				break;
 	   			}
 	   			else if(t2.getNature() != NatureType.Interval){
 	   				/* ERREUR : Op2 invalide */
+	   				result.setOk(false);
+	   				result.setConv2(true);
+	   				break;
 	   			}
 	   			
 	   			result.setOk(true);
@@ -248,6 +271,8 @@ public class ReglesTypage {
 	   							
 	   						default:
 	   							/* Erreur sur l'opérande 2 */
+	   							result.setOk(false);
+	   							result.setConv2(true);
 	   					}
 	   					break;
 	   					
@@ -264,12 +289,16 @@ public class ReglesTypage {
 	   							
 	   						default:
 	   							/* Erreur sur l'opérande 2 */
+	   							result.setOk(false);
+	   							result.setConv2(true);
 	   					}
 
 	   					break;
 	   					
 	   				default:
 	   					/* Erreur sur l'opérande 1 */
+	   					result.setOk(false);
+	   					result.setConv1(true);
 	   			}
 	   			break;
 	   			
@@ -277,10 +306,14 @@ public class ReglesTypage {
 	   			/* Cas de l'indexation d'un tableau */
 	   			if(t1.getNature() != NatureType.Array || t1.getIndice().getNature() != NatureType.Interval) {
 	   				/* Erreur sur l'opérande 1 */
+	   				result.setOk(false);
+	   				result.setConv1(true);
 	   			}
 	   			else {
 	   				if(t2.getNature() != NatureType.Interval) {
 	   					/* Erreur sur l'opérande 2 */
+	   					result.setOk(false);
+	   					result.setConv2(true);
 	   				}
 	   				else {
 	   					/* Indexation correcte : le type du résultat correspond au type du tableau */
