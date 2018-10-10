@@ -29,7 +29,8 @@ public class ReglesTypage {
 	   				result.setOk(true);
 	   			}
 	   			else{
-	   				result.setOk(false);
+	   				
+	   				//result.setOk(false);
 	   			}
 	   			break;
 	   			
@@ -121,6 +122,8 @@ public class ReglesTypage {
 	   		case SupEgal:
 	   		case InfEgal:
 	   			/* Le résultat est booléen */
+				result.setTypeRes(Type.Boolean);
+
 	   			/* On commence par examiner le type du premier opérande */
 	   			switch(t1.getNature()){
 	   			
@@ -133,7 +136,6 @@ public class ReglesTypage {
 	   							result.setConv1(true);
 		   					case Interval:
 		   						result.setOk(true);
-		   						result.setTypeRes(Type.Boolean);
 		   						break;
 		   						
 	   						default:
@@ -150,7 +152,6 @@ public class ReglesTypage {
 	   							result.setConv2(true);
 		   					case Real:
 		   						result.setOk(true);
-		   						result.setTypeRes(Type.Boolean);
 		   						break;
 		   						
 	   						default:
@@ -228,6 +229,65 @@ public class ReglesTypage {
 	   			break;
 	   			
 	   		case DivReel:
+	   			/* Le résultat est un réel */
+	   			result.setTypeRes(Type.Real);
+	   			
+	   			/* On commence par examiner le type du premier opérande */
+	   			switch(t1.getNature()) {
+	   			
+	   				case Interval:
+	   					/* On examine le type de l'opérande 2 */
+	   					switch(t2.getNature()) {
+	   					  							
+	   						case Real:
+	   							/* Conversion de l'opérande 1 nécessaire */
+	   							result.setConv1(true);
+	   						case Interval:
+	   							result.setOk(true);
+	   							break;
+	   							
+	   						default:
+	   							/* Erreur sur l'opérande 2 */
+	   					}
+	   					break;
+	   					
+	   				case Real:
+	   					/* On examine le type de l'opérande 2 */
+	   					switch(t2.getNature()) {
+	   					
+	   						case Interval:
+	   							/* Conversion de l'opérande 2 nécessaire */
+	   							result.setConv2(true);
+	   						case Real:
+	   							result.setOk(true);
+	   							break;
+	   							
+	   						default:
+	   							/* Erreur sur l'opérande 2 */
+	   					}
+
+	   					break;
+	   					
+	   				default:
+	   					/* Erreur sur l'opérande 1 */
+	   			}
+	   			break;
+	   			
+	   		case Index:
+	   			/* Cas de l'indexation d'un tableau */
+	   			if(t1.getNature() != NatureType.Array || t1.getIndice().getNature() != NatureType.Interval) {
+	   				/* Erreur sur l'opérande 1 */
+	   			}
+	   			else {
+	   				if(t2.getNature() != NatureType.Interval) {
+	   					/* Erreur sur l'opérande 2 */
+	   				}
+	   				else {
+	   					/* Indexation correcte : le type du résultat correspond au type du tableau */
+	   					result.setOk(true);
+	   					result.setTypeRes(t1.getElement());
+	   				}
+	   			}
 	   			break;
 	   			
 	   		default:
@@ -243,7 +303,49 @@ public class ReglesTypage {
     */
    static ResultatUnaireCompatible unaireCompatible
          (Noeud noeud, Type t) {
-      return null;
+	   
+	   	ResultatUnaireCompatible result = new ResultatUnaireCompatible();
+
+	   	/* On commence par identifier le type du Noeud */
+	   	switch(noeud) {
+	  	
+	   		case Non:
+	   			/* Le résultat est de type booléen */
+	   			result.setTypeRes(Type.Boolean);
+	   			/* L'opérande doit être de type booléen */
+	   			if(t.getNature() == NatureType.Boolean) {
+	   				result.setOk(true);
+	   			}
+	   			else {
+	   				/* Erreur sur le type de l'opérande */
+	   			}
+	   			break;
+	   			
+	   		case PlusUnaire:
+	   		case MoinsUnaire:
+	   			/* On examine le type de l'opérande */
+	   			switch(t.getNature()) {
+	   			
+	   				case Interval:
+	   					/* Le résultat est de type booléen */
+	   					result.setTypeRes(Type.Integer);
+	   				case Real:
+	   					/* Le résultat est de type réel */
+	   					result.setTypeRes(Type.Real);
+	   					result.setOk(true);
+	   					break;
+	   					
+	   				default:
+	   					/* Erreur sur le type de l'opérande */
+	   					
+	   			}
+	   			break;
+	   			
+	   		default:
+	   			System.out.println("Unknow node");
+	   	}
+	   
+	   	return result;
    }
          
 }
