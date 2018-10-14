@@ -1,0 +1,8 @@
+program
+    i : 1 .. 1;
+    val : integer;
+    val : boolean;
+begin
+   null;
+end.
+

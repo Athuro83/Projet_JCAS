@@ -1,0 +1,8 @@
+==[ Description des tests ]==
+
+*) test_affectIllegale1.cas
+    Affectation d'une variable entière à une variable booléenne
+
+*) test_affectIllegale2.cas
+    Affectation d'une constante entière à une variable booléenne
+

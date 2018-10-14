@@ -1,0 +1,7 @@
+program
+    i : 1 .. 10 ;
+    flag : boolean ;
+begin
+    i := 5;
+    flag := i;
+end.

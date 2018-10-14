@@ -1,0 +1,6 @@
+program
+    i : integer;
+    var : boolean;
+begin
+    null;
+end.
