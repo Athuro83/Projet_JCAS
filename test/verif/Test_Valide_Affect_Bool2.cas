@@ -1,0 +1,7 @@
+-- Valide, affectation d'un boolean a l'issue d'une comparaison
+
+program
+    b : boolean;
+begin
+    b := 4 = 1;
+end.

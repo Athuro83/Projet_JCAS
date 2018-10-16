@@ -1,0 +1,7 @@
+-- Erreur, la fonction read prend en argument une chaine de caractere
+
+program
+    b : boolean;
+begin
+    read(b);
+end.

@@ -1,0 +1,9 @@
+-- Erreur, on applique l'operateur not sur un integer
+
+program
+  i : integer;
+  b : boolean;
+begin
+  i := 5;
+  b := not x; -- Interdit
+end.

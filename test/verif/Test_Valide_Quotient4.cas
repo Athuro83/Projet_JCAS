@@ -1,0 +1,11 @@
+-- Valide, on fait le quotient entre 2 real et on affecte le resultat a un real
+
+program
+    r1 : real;
+    r2 : real;
+    res : real;
+begin
+    r1 := 3;
+    r2 := 2;
+    res := r1 / r2;
+end.

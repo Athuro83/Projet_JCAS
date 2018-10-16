@@ -1,0 +1,7 @@
+-- Valide, on teste l'utilisation de max_int
+
+program
+    t : array[1..max_int] of real;
+begin
+    null;
+end.

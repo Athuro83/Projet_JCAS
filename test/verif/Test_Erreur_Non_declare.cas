@@ -1,0 +1,7 @@
+-- Erreur, on fait une affectation a un identificateur non declare
+
+program
+
+begin
+    x := 5; -- interdit sans declaration prealable de x
+end.

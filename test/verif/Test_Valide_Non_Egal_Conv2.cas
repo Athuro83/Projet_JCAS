@@ -1,0 +1,7 @@
+-- Valide, on regarde si un reel et un entier sont differents et on affecte le resultat a un boolean
+
+program
+  b : boolean ;
+begin
+  b := 2.2 /= 2;
+end.

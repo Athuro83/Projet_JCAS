@@ -1,0 +1,11 @@
+-- Erreur, test du plus
+
+program
+    b : boolean;
+    i : integer;
+    res : real;
+begin
+    b := 5;
+    i := 10;
+    res := b + i;
+end.

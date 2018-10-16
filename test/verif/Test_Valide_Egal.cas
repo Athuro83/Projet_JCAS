@@ -1,0 +1,13 @@
+-- Valide, on compare un integer et un real ce qui est possible
+-- cela retourne un boolean ce qui est correct pour le if
+
+program
+    i : integer;
+    r : real;
+begin
+    i :=2;
+    r := 1.1;
+    if i = r
+        write("Test");
+    end;
+end.

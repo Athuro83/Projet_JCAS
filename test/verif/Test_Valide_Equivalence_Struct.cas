@@ -1,0 +1,10 @@
+-- Valide, on affecte des types de tableaux a d'autres types de tableaux de façon correcte
+
+program
+  v1 : array[1..10] of integer;
+  v2 : array[1..10] of integer;
+  m : array[1..5] of array[1..10] of integer;
+begin
+    v1 := v2; -- v1 et v2 sont bien du meme type (tableau de 10 entiers)
+    m[1] := v1; -- m[1] et v1 sont bien du meme type (tableau de 10 entiers)
+end.

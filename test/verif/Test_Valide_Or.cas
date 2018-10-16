@@ -1,0 +1,11 @@
+-- Valide, on applique l'operateur 'or' entre 2 boolean et on affecte le resultat a un boolean
+
+program
+  b1 : boolean;
+  b2 : boolean;
+  res : boolean;
+begin
+  b1 := true;
+  b2 := true;
+  res := b1 or b2;
+end.

@@ -1,0 +1,7 @@
+-- Erreur, test du plus unaire
+
+program
+    b : boolean;
+begin
+    b := +true;
+end.

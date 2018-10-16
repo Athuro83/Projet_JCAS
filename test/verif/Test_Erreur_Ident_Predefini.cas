@@ -1,0 +1,7 @@
+-- Erreur, redefinition d'un identificateur predefini
+
+program
+  integer : boolean;
+begin
+    null;
+end.

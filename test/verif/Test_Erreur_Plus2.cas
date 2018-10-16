@@ -1,0 +1,7 @@
+--Erreur, test du plus
+
+program
+    i : integer;
+begin
+    i := 1 + true;
+end.

@@ -1,0 +1,11 @@
+-- Valide, on fait une multiplication entre 2 real et on affecte le resultat a un real
+
+program
+    r1 : real;
+    r2 : real;
+    res : real;
+begin
+    r1 := 2.2;
+    r2 := 4.4;
+    res := r1 * r2;
+end.

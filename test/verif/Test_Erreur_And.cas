@@ -1,0 +1,11 @@
+-- Erreur, on applique l'operateur 'and' entre un integer et un boolean
+
+program
+    b : boolean;
+    i : integer;
+    res : integer;
+begin
+    b := true;
+    i := 1;
+    res := b and i; -- interdit
+end.

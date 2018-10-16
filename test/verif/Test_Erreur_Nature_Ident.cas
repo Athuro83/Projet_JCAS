@@ -1,0 +1,8 @@
+-- Erreur, la nature des identificateurs doit etre verifee
+
+program
+  i : integer;
+  j : i;  -- identificateur de type attendu
+begin
+    null;
+end.

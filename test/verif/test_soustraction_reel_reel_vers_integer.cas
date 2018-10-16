@@ -1,0 +1,10 @@
+-- Programme pour tester une addition entre un reel et un reel vers un integer
+program
+   operande1 : real ;
+   operande2 : real ;
+   resultat : integer ;
+begin
+  operande1 := 4.12 ;
+  operande2 := 6.57 ;
+  resultat := operande1 + operande2 ;
+end.

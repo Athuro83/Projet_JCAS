@@ -1,4 +1,6 @@
+-- Toto
 program
+    n : 1 .. 10;
     i : integer;
     var : boolean;
 begin

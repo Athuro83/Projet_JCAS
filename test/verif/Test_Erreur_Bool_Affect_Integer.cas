@@ -1,0 +1,8 @@
+-- Erreur, verification de type
+-- Affectation d'un Type.integer a un Type.Boolean
+
+program
+  b : boolean;
+begin
+    b := 5; -- Interdit
+end.

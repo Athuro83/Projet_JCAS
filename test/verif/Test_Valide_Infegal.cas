@@ -1,0 +1,7 @@
+-- Valide, on teste la comparaison inferieur ou egal entre un integer et un reel et on affecte le resultat a un boolean
+
+program
+    b : boolean;
+begin
+    b := 2 <= 2.2;
+end.

@@ -1,0 +1,11 @@
+-- Valide, on fait le quotient de 2 integer et on affecte le resultat a un real
+
+program
+    i1 : integer;
+    i2 : integer;
+    res : real;
+begin
+    i1 := 2;
+    i2 := 4;
+    res := i1 / i2;
+end.

@@ -1,0 +1,7 @@
+-- Erreur, on compare un boolean avec un entier
+
+program
+  b : boolean ;
+begin
+  b := true /= 3;
+end.

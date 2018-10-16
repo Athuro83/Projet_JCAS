@@ -1,0 +1,10 @@
+-- Valide, verification de type avec affectation d'un integer a un real
+
+program
+    i : integer;
+    r : real;
+
+begin
+    i := 4;
+    r := i;
+end.

@@ -1,0 +1,9 @@
+-- Erreur, La condition du while doit etre de type boolean
+
+program
+    i : integer;
+begin
+    while (i) do
+        write ("erreur");
+    end;
+end.

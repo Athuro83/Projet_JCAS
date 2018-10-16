@@ -1,0 +1,7 @@
+-- Erreur, on multiplie un real avec un boolean ce qui est impossible
+
+program
+  r : real;
+begin
+  r := 3 * true;
+end.

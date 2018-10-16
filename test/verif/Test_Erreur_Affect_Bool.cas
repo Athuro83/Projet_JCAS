@@ -1,0 +1,9 @@
+-- Erreur, affectation boolean non valide
+
+program
+    b1 : boolean;
+    b2 : boolean;
+begin
+    b1 := true;
+    b2 := true = 2;
+end.

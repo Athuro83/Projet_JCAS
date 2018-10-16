@@ -1,0 +1,11 @@
+-- Valide, on applique l'operateur 'and' entre 2 boolean et on affecte le resultat a un boolean
+
+program
+  b1 : boolean;
+  b2 : boolean;
+  res : boolean;
+begin
+  b1 := true;
+  b2 := true;
+  res := b1 and b2;
+end.

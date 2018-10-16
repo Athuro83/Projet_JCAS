@@ -1,0 +1,7 @@
+-- Valide, affectation d'une valeur booleene a un type boolean
+
+program
+  b : boolean;
+begin
+  b := true;
+end.

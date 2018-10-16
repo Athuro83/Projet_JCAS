@@ -1,0 +1,27 @@
+-- Erreur, on test des operateurs dans les boucles if
+
+program
+  i : integer;
+  b : boolean;
+begin
+  b := true;
+
+  if b = 20 then                      -- Interdit
+    write("Erreur : comparaison d'un boolean avec un entier");
+  end;
+  if b < 20 then                      -- intedit
+    write("Erreur : comparaison d'un boolean avec un entier");
+  end;
+  if b > 20 then
+    write("Erreur : comparaison d'un boolean avec un entier");
+  end;
+  if b /= 20.5 then
+    write("Erreur : comparaison d'un boolean avec un entier");
+  end;
+  if b <= 20 then
+    write("Erreur : comparaison d'un boolean avec un entier");
+  end;
+  if b >= 20.12 then
+    write("Erreur : comparaison d'un boolean avec un entier");
+  end;
+end.

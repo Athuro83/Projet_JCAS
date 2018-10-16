@@ -1,0 +1,7 @@
+-- Valide, on compare un integer et un real et on affecte le resultat a un boolean ce qui est correct
+
+program
+  b : boolean ;
+begin
+  b := 2 < 2.2 ;
+end.

@@ -1,0 +1,11 @@
+-- Valide, on soustrait un real a un integer, on affecte le resultat a un real ce qui doit fonctionner
+
+program
+    i : integer;
+    r : real;
+    res : real;
+begin
+    i := 3;
+    r := 2;
+    res := i - r;
+end.

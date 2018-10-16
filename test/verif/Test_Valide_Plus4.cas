@@ -1,0 +1,11 @@
+-- Valide, on additionne 2 real et on affecte le resultat a un real ce qui doit fonctionner
+
+program
+    x : real;
+    y : real;
+    res : real;
+begin
+    x :=3;
+    y :=2;
+    res := x + y;
+end.

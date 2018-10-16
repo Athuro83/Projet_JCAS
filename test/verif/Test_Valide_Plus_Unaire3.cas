@@ -1,0 +1,7 @@
+-- Valide, on teste le plus unaire
+
+program
+    t : 0..+5;
+begin
+    null;
+end.

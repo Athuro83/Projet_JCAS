@@ -1,0 +1,7 @@
+-- Valide, on teste la declaration d'un intervalle vide
+
+program
+  i : 5..2;
+begin
+    null;
+end.

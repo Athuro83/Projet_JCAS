@@ -1,0 +1,11 @@
+-- Erreur, on test la multiplication entre un integer et un real que l'on affecte a un boolean ce qui est interdit
+
+program
+    i : integer;
+    r : real;
+    res : boolean;
+begin
+    i := 5;
+    r := 10;
+    res := x * y;
+end.

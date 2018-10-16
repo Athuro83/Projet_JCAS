@@ -1,0 +1,9 @@
+-- Erreur, la condition du if doit etre de type boolean
+
+program
+    i : integer;
+begin
+    if i then
+        write("erreur");
+    end;
+end.

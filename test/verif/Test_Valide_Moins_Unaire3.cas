@@ -1,0 +1,7 @@
+-- Valide, on teste le moins unaire dans une declaration
+
+program
+    t : -5..5;
+begin
+    null;
+end.

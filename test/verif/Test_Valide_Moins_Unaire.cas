@@ -1,0 +1,7 @@
+-- Valide, on teste le moins unaire sur l'affectation d'un real
+
+program
+    r : real;
+begin
+    r := -3.1;
+end.

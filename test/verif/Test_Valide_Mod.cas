@@ -1,0 +1,9 @@
+-- Valide, on applique le modulo entre 2 entiers et on affecte le resultat a un entier
+
+program
+    i1 : integer;
+    i2 : integer;
+    res : integer;
+begin
+    res := i1 mod i2;
+end.

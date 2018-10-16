@@ -1,0 +1,7 @@
+-- Erreur, cherche a acceder a une valeur d'un tableau alors que x est un integer
+
+program
+    x : integer;
+begin
+    x[2] := 3;
+end.

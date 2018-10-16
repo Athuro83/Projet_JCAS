@@ -1,0 +1,10 @@
+-- Valide, on teste la boucle while avec un increment integer
+
+program
+    i : integer
+begin
+    i := 10;
+    while (i > 0) do
+        i := i - 1;
+    end;
+end.

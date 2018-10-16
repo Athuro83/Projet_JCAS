@@ -1,0 +1,7 @@
+-- Erreur, le type de x n'est pas defini
+
+program
+    x : erreur;
+begin
+    null;
+end.

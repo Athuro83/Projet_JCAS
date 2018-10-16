@@ -1,0 +1,8 @@
+-- Erreur, on ne peut pas comparer un boolean avec un chiffre
+
+
+program
+  b : boolean ;
+begin
+  b := true < 3;
+end.

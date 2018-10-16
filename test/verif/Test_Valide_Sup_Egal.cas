@@ -1,0 +1,6 @@
+-- Valide, on compare un reel avec un entier et on affecte le resultat dans un boolean
+program
+    b : boolean;
+begin
+    b := 2.2 >= 4;
+end.

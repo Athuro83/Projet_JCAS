@@ -1,0 +1,11 @@
+-- Erreur, on fait l'operation 'or' entre un integer et un boolean alors que ca doit etre entre 2 boolean
+
+program
+  b : boolean;
+  i : integer;
+  res : integer;
+begin
+  b := true;
+  i := 1;
+  res := b or i; -- Interdit
+end.

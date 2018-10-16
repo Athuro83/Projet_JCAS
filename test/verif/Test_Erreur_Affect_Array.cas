@@ -1,0 +1,9 @@
+-- Erreur, Verification de type
+-- Affection entre deux tableaux n'ayant pas les memes bornes
+
+program
+    t1 : array[1..10] of integer;
+    t2 : array[2..5] of integer ;
+begin
+    t1 := t2;
+end.

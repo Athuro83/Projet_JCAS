@@ -1,0 +1,8 @@
+-- Erreur, affectation entre deux tableaux n'ayant pas les memes bornes et pas le meme type
+
+program
+    t1 : array[1..10] of integer;
+    t2 : array[1..5] of boolean;
+begin
+    t1 := t2;
+end.

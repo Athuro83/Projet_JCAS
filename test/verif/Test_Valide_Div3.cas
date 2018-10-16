@@ -1,0 +1,9 @@
+-- VRAI, test de la division entre real
+
+program
+    x : real;
+    y : real;
+    res : real;
+begin
+    res := x div y;
+end.

@@ -1,0 +1,7 @@
+-- Valide, on fait la multiplication d'un integer et d'un real
+
+program
+  r : real;
+begin
+  r := 2 * 3.1;
+end.

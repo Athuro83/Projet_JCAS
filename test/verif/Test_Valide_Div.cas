@@ -1,0 +1,9 @@
+-- Valide, on divise un integer par un integer et on affecte le resultat a un integer
+
+program
+    i1 : integer;
+    i2 : integer;
+    res : integer;
+begin
+    res:= i1 div i2;
+end.

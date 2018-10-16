@@ -1,0 +1,8 @@
+-- Erreur, Verification de type
+-- Test d'affectation d'un boolean sur un type Type.Real
+
+program
+    r : real;
+begin
+    r := true;
+end.

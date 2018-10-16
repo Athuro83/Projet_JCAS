@@ -1,0 +1,18 @@
+-- Programme pour tester la creation de tableau de tableaux
+program
+   t1 : array[1..10] of integer ;
+   t2 : array[1..4] of boolean ;
+   m1 : array[1..5] of array[1..10] of array[1..4] of array[1..10] of integer ;
+   m2 : array[1..5] of array[1..10] of array[1..4] of boolean ;
+begin
+   if (t1 = m1[1][1][1]) then
+     -- Affichage d'un message
+     write("Les tableaux d'entiers sont equivalents") ;
+     new_line ;
+  end ;
+  if (t2 = m2[1][1]) then
+    -- Affichage d'un message
+    write("Les tableaux d'entiers sont equivalents") ;
+    new_line ;
+  end ;
+end.

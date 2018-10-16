@@ -1,0 +1,7 @@
+-- Erreur, test de la division d'un integer par un boolean
+
+program
+    i : integer;
+begin
+    i := 3 div true;
+end.

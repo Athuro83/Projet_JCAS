@@ -1,0 +1,11 @@
+-- Valide, on teste le moins sur des integer
+
+program
+    i1 : integer;
+    i2 : integer;
+    res : integer;
+begin
+    i1 := 2;
+    i2 := 2;
+    res := i1 - i2;
+end.

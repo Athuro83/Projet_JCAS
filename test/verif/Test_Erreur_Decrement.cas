@@ -1,0 +1,10 @@
+-- Erreur, decrement sur un boolean impossible
+
+program
+    b : boolean ;
+
+begin
+    for b := 20 to 0 do
+        T[b] := 2 * b ;
+    end ;
+end.

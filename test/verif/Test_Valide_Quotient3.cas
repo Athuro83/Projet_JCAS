@@ -1,0 +1,11 @@
+-- Valide, on fait le quotient d'un real par un integer et on affecte le resultat a un real
+
+program
+    r : real;
+    i : integer;
+    res : real;
+begin
+    r := 3.3;
+    i := 4;
+    res := r / i;
+end.

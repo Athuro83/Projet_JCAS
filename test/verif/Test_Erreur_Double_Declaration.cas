@@ -1,0 +1,8 @@
+-- Erreur, interdiction de redefinir un identificateur deja declare
+
+program
+  i : integer;
+  i: array[1..10] of integer; -- interdit
+begin
+    null;
+end.

@@ -1,0 +1,8 @@
+-- Valide, on affecte un integer d'un tableau a un real
+
+program
+    t : array[1..10] of integer;
+    r : real;
+begin
+    r := t[4];
+end.

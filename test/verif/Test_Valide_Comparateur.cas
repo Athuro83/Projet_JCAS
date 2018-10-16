@@ -1,0 +1,30 @@
+-- Valide, on teste les operateurs de comparaison
+
+program
+  i : integer;
+  r : real;
+begin
+  write("Donnez un entier : ");
+  read(i);
+  write("Donnez un reel : ");
+  read(r);
+
+  if i = 10 then
+    write("Vous avez trouve le bon entier");
+  end;
+  if r < 10 then
+    write("Votre reel est trop petit");
+  end;
+  if i > 10 then
+    write ("Votre entier est trop grand");
+  end;
+  if r /= 10.5 then
+    write("Votre reel ne vaut pas 10,5");
+  end;
+  if i <= 10 then
+    write("Votre entier est inferieur ou egal a 10");
+  end;
+  if r >= 10.5 then
+    write ("Votre reel est superieur ou egal a 10,5");
+  end;
+end.

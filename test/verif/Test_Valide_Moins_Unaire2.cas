@@ -1,0 +1,7 @@
+-- Valide, on teste le moins unaire sur l'affectation d'un integer
+
+program
+    i : integer;
+begin
+    i := -3;
+end.

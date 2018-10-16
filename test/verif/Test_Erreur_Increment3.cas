@@ -1,0 +1,10 @@
+-- Erreur, l'increment de la boucle for va de 1 a true ce qui est interdit
+
+program
+    i : integer;
+    t : array[1..20] of integer;
+begin
+    for i := 1 to true do
+        t[i] := 2 * i;
+    end ;
+end.

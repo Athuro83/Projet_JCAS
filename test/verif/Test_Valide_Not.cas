@@ -1,0 +1,8 @@
+-- Valide, on applique l'operateur not a un type boolean et on affecte le resultat a un type boolean
+
+program
+  b, res: boolean;
+begin
+  b := true;
+  res := not b;     
+end.

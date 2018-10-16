@@ -1,0 +1,7 @@
+-- Valide, on teste le type array en affectant un entier a une certaine position
+
+program
+    t : array[1..10] of integer;
+begin
+    t[2] := 4;
+end.

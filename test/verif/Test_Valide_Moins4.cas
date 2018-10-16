@@ -1,0 +1,11 @@
+-- Valide, on teste la soustraction entre 2 real que l'on affecte a un real ce qui doit fonctionner
+
+program
+    x : real;
+    y : real;
+    res : real;
+begin
+    x := 2;
+    y := 3;
+    res := x - y;
+end.

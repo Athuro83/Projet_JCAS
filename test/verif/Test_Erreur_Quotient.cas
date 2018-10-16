@@ -1,0 +1,7 @@
+-- Erreur, on fait la division entiere d'un entier par un boolean ce qui est interdit
+
+program
+    i : integer;
+begin
+    i := 3 / true;
+end.

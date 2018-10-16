@@ -1,0 +1,9 @@
+-- Programme pour tester une addition valide
+program
+   operande1, operande2 : integer ;
+   resultat : integer ;
+begin
+  operande1 := 4 ;
+  operande2 := 6 ;
+  resultat := operande1 + operande2 ;
+end.

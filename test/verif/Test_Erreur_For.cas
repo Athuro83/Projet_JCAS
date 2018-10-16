@@ -1,0 +1,10 @@
+-- Erreur, borne de la boucle for de type boolean
+
+program
+  i : integer;
+  t : array [1 .. 20] of integer ;
+begin
+    for i := 1 to true do       -- interdit
+      t[i] := 2 * i + i;
+    end ;
+end.

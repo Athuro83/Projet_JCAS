@@ -1,0 +1,10 @@
+-- Programme pour tester une soustraction entre un integer et un reel vers un reel
+program
+   operande1 : integer ;
+   operande2 : real ;
+   resultat : real ;
+begin
+  operande1 := 4 ;
+  operande2 := 6.57 ;
+  resultat := operande1 - operande2 ;
+end.

@@ -1,0 +1,9 @@
+-- Erreur, test de la division de deux integer affecte a un real
+
+program
+    x : integer;
+    y : integer;
+    res : real;
+begin
+    res := x div y;
+end.

@@ -1,0 +1,7 @@
+-- Valide, intervalle vide dans un tableau
+
+program
+    t : array[6..5] of integer;
+begin
+    null;
+end.

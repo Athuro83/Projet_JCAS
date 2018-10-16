@@ -1,0 +1,11 @@
+-- Valide, on fait une multiplication entre un real et un integer et on associe le resultat a un real
+
+program
+    r : real;
+    i : integer;
+    res : real;
+begin
+    r := 4.4;
+    i := 2;
+    res := r * i;
+end.

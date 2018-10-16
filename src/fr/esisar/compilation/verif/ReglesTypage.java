@@ -29,8 +29,7 @@ public class ReglesTypage {
 	   				result.setOk(true);
 	   			}
 	   			else{
-	   				
-	   				//result.setOk(false);
+	   				result.setOk(false);
 	   			}
 	   			break;
 	   			

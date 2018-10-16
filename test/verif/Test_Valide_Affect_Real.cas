@@ -1,0 +1,7 @@
+-- Valide, affectation d'une valeur reelle a un real
+
+program
+  r : real;
+begin
+    r := 0.5;
+end.

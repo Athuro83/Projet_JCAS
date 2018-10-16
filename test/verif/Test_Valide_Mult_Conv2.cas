@@ -1,0 +1,8 @@
+-- Valide, on fait la multiplication d'un reel et d'un entier et on affecte le resultat a un real
+
+
+program
+  r : real;
+begin
+  r := 2.2 * 2;
+end.

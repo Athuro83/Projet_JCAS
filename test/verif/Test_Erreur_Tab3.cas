@@ -1,0 +1,8 @@
+-- Erreur, on affecte une valeur real d'un tableau dans un integer
+
+program
+    t : array[1..10] of real;
+    i : integer;
+begin
+    i := t[5];      -- interdit
+end.

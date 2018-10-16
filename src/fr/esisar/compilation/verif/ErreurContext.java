@@ -13,7 +13,7 @@ package fr.esisar.compilation.verif;
 
 public enum ErreurContext {
 	
-	ErreurOperandeNonBooleen,
+	/*ErreurOperandeNonBooleen,
 	ErreurOperande1NonBooleen,
 	ErreurOperande2NonBooleen,
 	ErreurOperandeNonReal,
@@ -30,17 +30,26 @@ public enum ErreurContext {
 	ErreurOperande2NonArray,
 	ErreurOperandeNonNumerique,
 	ErreurOperande1NonNumerique,
-	ErreurOperande2NonNumerique,
+	ErreurOperande2NonNumerique,*/
+	
+	//condensé en :
+	ErreurArite,
+	ErreurDejaDeclare,
+	ErreurIdentificateurTypeNonReconnu,
+	ErreurType,
+	ErreurNatureIDENT,
+	ErreurPasDeclare,
 	ErreurIntervalNonCompatible,
-	ErreurAffectationIntervalAutre,
-	ErreurAffectationRealAutre,
+	ErreurAffectationNumeriqueAutre,
 	ErreurAffectationBooleanAutre,
 	ErreurAffectationArrayAutre,
 	ErreurAffectationArrayIntervalsDifferents,
 	ErreurAffectationArrayTypesElementsIncompatibles,
+	ErreurAffectation,
 	ErreurVariablesBoucleNonInterval,
 	ErreurVariableRead,
 	ErreurExpressionWrite,
+	ErreurIndicesInverse,
     ErreurNonRepertoriee;
 
     void leverErreurContext(String s, int numLigne) throws ErreurVerif {
@@ -50,74 +59,35 @@ public enum ErreurContext {
        switch (this) {
        
        
-       case ErreurOperandeNonBooleen :
-    	   System.err.println("L'operande devrait etre un Booleen");
+       case ErreurIdentificateurTypeNonReconnu:
+    	   System.err.println("L'identificateur de type dans la déclaration n'est pa reconnu");
     	   break;
-       case ErreurOperande1NonBooleen :
-    	   System.err.println("L'operande 1 devrait etre un Booleen");
+       case ErreurDejaDeclare: 
+    	   System.err.println("La variable a déja été déclarée");
     	   break;
-       case ErreurOperande2NonBooleen :
-    	   System.err.println("L'operande 2 devrait etre un Booleen");
+       case ErreurArite :
+    	   System.err.println("Le nombre de fils ne correspond pas");
+    	   break;  	   
+       case ErreurType :
+    	   System.err.println("Le type ne correspond pas");
     	   break;
-       case ErreurOperandeNonReal :
-    	   System.err.println("L'operande devrait etre un Real");
+       case ErreurPasDeclare :
+    	   System.err.println("L'identificateur n'a pas été déclaré");
     	   break;
-       case ErreurOperande1NonReal :
-    	   System.err.println("L'operande 1 devrait etre un Real");
-    	   break;
-       case ErreurOperande2NonReal :
-    	   System.err.println("L'operande 2 devrait etre un Real");
-    	   break;
-       case ErreurOperandeNonString :
-    	   System.err.println("L'operande devrait etre un String");
-    	   break;
-       case ErreurOperande1NonString :
-    	   System.err.println("L'operande 1 devrait etre un String");
-    	   break;
-       case ErreurOperande2NonString :
-    	   System.err.println("L'operande 2 devrait etre un String");
-    	   break;
-       case ErreurOperandeNonInterval :
-    	   System.err.println("L'operande devrait etre un Interval");
-    	   break;
-       case ErreurOperande1NonInterval :
-    	   System.err.println("L'operande 1 devrait etre un Interval");
-    	   break;
-       case ErreurOperande2NonInterval :
-    	   System.err.println("L'operande 2 devrait etre un Interval");
-    	   break;
-       case ErreurOperandeNonArray :
-    	   System.err.println("L'operande devrait etre un Array");
-    	   break;
-       case ErreurOperande1NonArray :
-    	   System.err.println("L'operande 1 devrait etre un Array");
-    	   break;
-       case ErreurOperande2NonArray :
-    	   System.err.println("L'operande 2 devrait etre un Array");
-    	   break;
-       case ErreurOperandeNonNumerique :
-    	   System.err.println("L'operande devrait etre un Real ou un Interval");
-    	   break;
-       case ErreurOperande1NonNumerique :
-    	   System.err.println("L'operande 1 devrait etre un Real ou un Interval");
-    	   break;
-       case ErreurOperande2NonNumerique :
-    	   System.err.println("L'operande 2 devrait etre un Real ou un Interval");
+       case ErreurNatureIDENT :
+    	   System.err.println("La nature de l'identificateur ne correspond pas");
     	   break;
        case ErreurIntervalNonCompatible :
     	   System.err.println("L'Interval doit etre defini par deux Interval ");
     	   break;
-       case ErreurAffectationIntervalAutre :
-    	   System.err.println("L'<expression> devrait etre un Interval ");
-    	   break;
-       case ErreurAffectationRealAutre :
-    	   System.err.println("L'<expression> devrait etre un Real ou un Interval ");
+       case ErreurAffectationNumeriqueAutre :
+    	   System.err.println("L'<expression> devrait etre un Interval ou un Real ");
     	   break;
        case ErreurAffectationBooleanAutre :
     	   System.err.println("L'<expression> devrait etre un Boolean ");
     	   break;
        case ErreurAffectationArrayAutre :
-    	   System.err.println("L'<expression> devrait etre un Array");
+    	   System.err.println("L'<expression> devrait etre un Array"); 
     	   break;
        case ErreurAffectationArrayIntervalsDifferents :
     	   System.err.println("Les indices de la <place> et de l'<expression> devraient etre des Interval de memes bornes");
@@ -128,8 +98,14 @@ public enum ErreurContext {
        case ErreurVariablesBoucleNonInterval :
     	   System.err.println("La variable de controle et les expressions devraient etre des Interval");
     	   break;
+       case ErreurAffectation :
+    	   System.err.println("L'affectation est incorrecte");
+    	   break;
        case ErreurVariableRead :
     	   System.err.println("La <place> de l'instruction read devraient etre un Real ou un Interval");
+    	   break;
+       case ErreurIndicesInverse :
+    	   System.err.println("Les indices de l'incrémentation ne correspondent pas");
     	   break;
        case ErreurExpressionWrite :
     	   System.err.println("Les expressions devraient etre de type Real, Interva ou String");

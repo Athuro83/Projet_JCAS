@@ -1,0 +1,8 @@
+-- Erreur, affectation de deux tableaux ayant les memes bornes mais pas le meme type
+
+program
+    t1 : array[1..10] of integer;
+    t2 : array[1..10] of boolean;
+begin
+    tab := tab2;
+end.

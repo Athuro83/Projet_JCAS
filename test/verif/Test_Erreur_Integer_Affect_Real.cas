@@ -1,0 +1,8 @@
+-- Erreur, verification de type
+-- Affectation d'un Type.Real a un Type.Integer
+
+program
+    i : integer;
+begin
+    i := 0.5; -- Interdit
+end.

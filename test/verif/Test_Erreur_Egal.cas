@@ -1,0 +1,9 @@
+-- Erreur, on ne peut pas comparer un integer et un real
+
+program
+    i : integer;
+    r : real;
+    b : boolean;
+begin
+    b := x = y;
+end.

@@ -1,0 +1,11 @@
+-- Valide, on fait la multiplication de 2 integer et on applique le resultat a un integer
+
+program
+    i1 : integer;
+    i2 : integer;
+    res : integer;
+begin
+    i1 := 2;
+    i2 := 4;
+    res := i1 * i2;
+end.

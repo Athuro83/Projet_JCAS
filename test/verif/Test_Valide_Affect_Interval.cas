@@ -1,0 +1,7 @@
+-- Valide, affectation d'une valeur entiere a un integer
+
+program
+ i : integer;
+begin
+    i := 4;
+end.

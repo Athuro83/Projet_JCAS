@@ -1,0 +1,9 @@
+-- Erreur, on test mod
+
+program
+    x : integer;
+    y : integer;
+    res : real;
+begin
+    res := x mod y;
+end.
