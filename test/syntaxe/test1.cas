@@ -1,0 +1,6 @@
+program
+   i : 1 .. 5 ;
+begin
+    write("Bonjour");
+end.
+

@@ -1,0 +1,76 @@
+
+DOCUMENTATION
+
+
+
+I/ MESSAGES D'ERREURS :
+
+	Les multiples erreurs de type de la syntaxe Jcas ont été rassemblées sous l'erreur "ErreurType". L'erreur est levée dans de nombreux cas : 
+-Pour une opération unaire, le type de l'opérande ne corresond pas à l'opération
+-Pour une opération binaire, le type de l'un ou l'autre des opérandes ne corresond pas à l'opération
+-La variable de contrôle, ou une des deux epressions d'un for ne sont pas des Interval
+-Une expression dans l'instruction write n'est ni un Real, ni un Interval, ni un String
+-etc...
+
+Si un noeud de l'arbre possède un mauvais nombre de fils, l'erreur ErreurArite est levée. 
+
+Si une opérande est déclarée plusieurs fois (la variable existe déjà dans l'environnement), ErreurDejaDeclare est levée. 
+
+Si un identificateur de type n'est pas corret, ErreurIdentificateurTypeNonReconnu est levée. 
+
+Si un identificateur est nommé avec un mot reservé (boolean, false etc...), ErreurNatureIDENT est levée.
+
+Si un intervalle est défini autrement que par deux Interval, ErreurIntervalNonCompatible est levée. 
+
+Un identificateur non déclaré au préalable lève ErreurPasDeclare.
+
+Les règles contextuelles des affectations ont donné lieu à 6 erreurs distinctes :
+- <place> est de type Interval mais <expression> ne l'est pas (ErreurAffectationIntervalAutre)
+- <place> est de type Real mais <expression> n'est pas numérique (ni un Interval ni un Real) (ErreurAffectationRealAutre)
+- <place> est de type Boolean mais <expression> ne l'est pas (ErreurAffectationBooleanAutre)
+- <place> est de type Array mais <expression> ne l'est pas (ErreurAffectationArrayAutre)
+- les indices de <place> et de <expression> ne sont pas des Interval de mêmes bornes (ErreurAffectationArrayIntervalsDifferents)
+- les éléments d'un Array ne correspondent pas avec le type annoncé. (ErreurAffectationArrayTypesElementsIncompatibles)
+
+Et une erreur générale ErreurAffectation complète les autres cas. 
+
+Si la variable de controle et les expressions d'une boucle ne sont pas des Interval, ErreurVariablesBoucleNonInterval est levée.
+
+Si une incrémentation ou décrémentation est définie avec des indices inversés, ErreurIndicesInverse est levée. 
+
+Si la <place> de l'instruction read n'est pas numérique (Interval ou Real), une erreur est soulevée. (ErreurVariableRead)
+
+Si une expression dans l'instruction write n'est ni un Real, ni un Interval, ni un String, une erreur est soulevée (ErreurExpressionWrite)
+
+
+
+
+
+II/ ARCHITECTURE DE LA PASSE 2 :
+
+	Dans la passe 2, nous avons parcouru l'arbre en une seule fois en decente récursive. Nos fonctions lèvent les erreurs, décorent les noeuds et 
+rajoutent les noeuds Conversion. 
+Les classes ResultatBinaireCompatible et ResultatUnaireCompatible testent la compatibilité des opérations, et leurs informations sont utilisées
+dans les fonctions. 
+
+
+
+
+
+
+III/ METHODOLOGIE DE TEST :
+
+	La méthodologie de test utilisée dans ce projet a été la suivante : 
+nous avons choisi de rédiger de nombreux tests basiques dans le but d’évaluer au mieux notre compilateur. Ainsi nous avons vu que ce dernier respectait les règles sémantiques décritent, entre autre, dans le fichier context.txt.
+	
+	Pour rédiger des tests permettant de couvrir la majeur partie des règles nous avons suivi une démarche qui est la suivante :
+	•	Analyse précise du fichier context.txt
+	•	Description du test dans un commentaire
+	•	Rédaction de programmes simples et concis
+	•	Un test se focalise sur une règle précise (pour la plupart)
+
+	De plus, pour chaque test nous avons essayé d’avoir :
+	•	Un test valide pour la règle évaluée
+	•	Un test erroné pour la règle évaluée
+
+

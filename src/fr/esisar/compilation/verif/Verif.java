@@ -262,13 +262,74 @@ public class Verif {
 			}
 			verifier_PLACE(a.getFils1());
 			verifier_EXP(a.getFils2());
-			ResultatAffectCompatible rac = ReglesTypage.affectCompatible(a.getFils1().getDecor().getType(), a.getFils2().getDecor().getType());
+			
+			Type t1,t2;
+			Decor dec = a.getFils2().getDecor();
+			
+			/* Déterminer le type de la PLACE */
+			dec = a.getFils1().getDecor();
+			if(dec != null) {
+				t1 = dec.getType();
+				if(t1 == null) t1 = dec.getDefn().getType();
+			}
+			else {
+				switch(a.getFils1().getNoeud()) {
+				
+					case Entier:
+						t1 = Type.Integer;
+						break;
+						
+					case Reel:
+						t1 = Type.Real;
+						break;
+						
+					case Chaine:
+						t1 = Type.String;
+						break;
+						
+					default:
+						throw new ErreurInterneVerif( "Noeud sans décor dans verifier_INST")  ; 
+				}
+			}
+
+			
+			/* Déterminer le type de l'EXP */
+			dec = a.getFils2().getDecor();
+			if(dec != null) {
+				t2 = dec.getType();
+				if(t2 == null) t2 = dec.getDefn().getType();
+			}
+			else {
+				switch(a.getFils2().getNoeud()) {
+				
+					case Entier:
+						t2 = Type.Integer;
+						break;
+						
+					case Reel:
+						t2 = Type.Real;
+						break;
+						
+					case Chaine:
+						t2 = Type.String;
+						break;
+						
+					default:
+						throw new ErreurInterneVerif( "Noeud sans décor dans verifier_INST")  ; 
+				}
+			}
+			
+			//System.out.println("Type :" + t2);
+			ResultatAffectCompatible rac = ReglesTypage.affectCompatible(t1, t2);
+			//System.out.println("Vérif contexte :" + rac);
 			if(!rac.getOk()) {
 				ErreurContext e = ErreurContext.ErreurAffectation;
 				e.leverErreurContext(null, a.getNumLigne());
 			}
-			a.setDecor(new Decor(Defn.creationType(a.getFils2().getDecor().getType())));
+			a.setDecor(new Decor(t1));
+			//System.out.println("Décor en place !");
 			break;
+			
 		case Pour:
 			if(a.getArite()!=2) {
 				ErreurContext e = ErreurContext.ErreurArite;
@@ -366,10 +427,13 @@ public class Verif {
 	private void verifier_PLACE(Arbre a) throws ErreurVerif {
 		switch(a.getNoeud()) {
 		case Ident:
-			if(env.chercher(a.getChaine()) == null ) {
+			Defn def;
+			if((def = env.chercher(a.getChaine())) == null ) {
 				ErreurContext e = ErreurContext.ErreurPasDeclare;
 				e.leverErreurContext(null, a.getNumLigne());
 			}
+			a.setDecor(new Decor (def));
+			/*
 			if( a.getChaine().toLowerCase().equals("integer") 
 					||a.getChaine().toLowerCase().equals("boolean")
 					||a.getChaine().toLowerCase().equals("false")
@@ -379,6 +443,7 @@ public class Verif {
 				ErreurContext e = ErreurContext.ErreurNatureIDENT;
 				e.leverErreurContext(null, a.getNumLigne());
 			}
+			*/
 			break;
 		case Index:
 			if(a.getArite()!=2) {
@@ -449,6 +514,7 @@ public class Verif {
 				e.leverErreurContext(null, a.getNumLigne());
 				return(RBC.getTypeRes());
 			}
+			
 		case Egal :
 		case Inf :
 		case SupEgal :
@@ -461,22 +527,21 @@ public class Verif {
 			}
 			RBC = ReglesTypage.binaireCompatible(a.getNoeud(),verifier_EXP(a.getFils1()), verifier_EXP(a.getFils2()));
 			if(RBC.getOk()) {
-				a.setDecor(new Decor(RBC.getTypeRes()));
-				return(RBC.getTypeRes());
-			}
-			else if(RBC.getConv1()) {
-				Arbre conversion = Arbre.creation1(Noeud.Conversion, a.getFils1(), a.getNumLigne());
-				a.setFils1(conversion);
-				conversion.setDecor(new Decor(Type.Real));
-				a.setDecor(new Decor(RBC.getTypeRes()));
-				return(RBC.getTypeRes());
-			}
-			else if (RBC.getConv2()) {
-				Arbre conversion = Arbre.creation1(Noeud.Conversion, a.getFils2(), a.getNumLigne());
-				a.setFils2(conversion);
-				conversion.setDecor(new Decor(Type.Real));
-				a.setDecor(new Decor(RBC.getTypeRes()));
-				return(RBC.getTypeRes());
+			
+				if(RBC.getConv1()) {
+					Arbre conversion = Arbre.creation1(Noeud.Conversion, a.getFils1(), a.getNumLigne());
+					a.setFils1(conversion);
+					conversion.setDecor(new Decor(Type.Real));
+					a.setDecor(new Decor(RBC.getTypeRes()));
+					return(RBC.getTypeRes());
+				}
+				else if (RBC.getConv2()) {
+					Arbre conversion = Arbre.creation1(Noeud.Conversion, a.getFils2(), a.getNumLigne());
+					a.setFils2(conversion);
+					conversion.setDecor(new Decor(Type.Real));
+					a.setDecor(new Decor(RBC.getTypeRes()));
+					return(RBC.getTypeRes());
+				}
 			}
 			else {
 				ErreurContext e = ErreurContext.ErreurAffectationBooleanAutre;
@@ -554,6 +619,7 @@ public class Verif {
 		case Index:
 			return verifier_INDEX(a);
 		case Conversion:
+			a.setDecor(new Decor(Type.Real));
 			return Type.Real;
 		case Entier:
 			a.setDecor(new Decor(Type.Integer));
