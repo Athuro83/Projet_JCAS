@@ -72,7 +72,7 @@ public class VerifReglesTypage {
 			}
 		}
 		
-		ErreurContext.ErreurAffectationBooleanAutre.leverErreurContext(null, 2);
+		//ErreurContext.ErreurAffectationBooleanAutre.leverErreurContext(null, 2);
 	}
 
 }

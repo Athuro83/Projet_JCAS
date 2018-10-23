@@ -42,22 +42,22 @@ public class Verif {
 		def = Defn.creationType(Type.Boolean);
 		def.setGenre(Genre.PredefBoolean);
 		env.enrichir("boolean", def);
-		//false
-		def = Defn.creationType(Type.Boolean);
-		def.setGenre(Genre.PredefFalse);
-		env.enrichir("false", def);
-		//true
-		def = Defn.creationType(Type.Boolean);
-		def.setGenre(Genre.PredefTrue);
-		env.enrichir("true", def);
-		//max_int
-		def = Defn.creationType(Type.Integer);
-		def.setGenre(Genre.PredefMaxInt);
-		env.enrichir("max_int", def);
 		//real
 		def = Defn.creationType(Type.Real);
 		def.setGenre(Genre.PredefReal);
 		env.enrichir("real", def);
+		//false
+		def = Defn.creationConstBoolean(false);
+		def.setGenre(Genre.PredefFalse);
+		env.enrichir("false", def);
+		//true
+		def = Defn.creationConstBoolean(true);
+		def.setGenre(Genre.PredefTrue);
+		env.enrichir("true", def);
+		//max_int
+		def = Defn.creationConstInteger(Integer.MAX_VALUE);
+		def.setGenre(Genre.PredefMaxInt);
+		env.enrichir("max_int", def);
 
 		// ------------
 		// DONE
@@ -89,151 +89,137 @@ public class Verif {
 		}
 	}
 
-
+	/**************************************************************************
+	 * DECL
+	 **************************************************************************/
 	private void verifier_DECL(Arbre a) throws ErreurVerif {
 		switch(a.getNoeud()) {
 		case Decl:
-			verifier_LISTE_IDENT(a, a.getFils1());
-			verifier_TYPE(a.getFils2());
+			Type type_decl = verifier_TYPE(a.getFils2());
+			verifier_LISTE_IDENT(a.getFils1(), type_decl);
 			break;
 		default:
 			throw new ErreurInterneVerif("Arbre incorrect dans verifier_DECL");
 		}
 	}
 
-	private void verifier_LISTE_IDENT(Arbre aDecl, Arbre a) throws ErreurVerif {
+	/**************************************************************************
+	 * LISTE_IDENT
+	 **************************************************************************/
+	private void verifier_LISTE_IDENT(Arbre a, Type type) throws ErreurVerif {
 		switch(a.getNoeud()) {
 		case Vide:
 			break;
+			
 		case ListeIdent:
-			verifier_LISTE_IDENT(aDecl, a.getFils1());
-			verifier_IDENT_decl(aDecl, a.getFils2());
+			verifier_LISTE_IDENT(a.getFils1(), type);
+			verifier_IDENT(a.getFils2(), type);
 			break;
+			
 		default:
 			throw new ErreurInterneVerif("Arbre incorrect dans verifier_LISTE_IDENT");
 		}
 	}
-
-	private Type getTypeDecl(Arbre a) throws ErreurVerif{
-			switch(a.getNoeud()) {
-			case Ident:
-				if(a.getChaine().toLowerCase().equals("real")){
-					return Type.Real;
-				}
-				else if(a.getChaine().toLowerCase().equals("boolean")){
-					return Type.Boolean;
-				}
-				else if(a.getChaine().toLowerCase().equals("string")){
-					return Type.String;
-				}
-				else if(a.getChaine().toLowerCase().equals("integer")){
-					return Type.Integer;
-				}else {
-					ErreurContext e = ErreurContext.ErreurIdentificateurTypeNonReconnu;
-					e.leverErreurContext(null, a.getNumLigne());
-				}
-			case Tableau:
-				return(Type.creationArray(Type.creationInterval(a.getFils1().getFils1().getEntier(), a.getFils1().getFils2().getEntier()), getTypeDecl(a.getFils2())));
-			case Intervalle:
-				return Type.creationInterval(a.getFils1().getEntier(), a.getFils2().getEntier());
-				
-			default :
-				throw new ErreurInterneVerif("Arbre incorrecte dans le getTypeDecl" );
-			}
-		
-	}
 	
-	private void verifier_IDENT_decl(Arbre aDecl, Arbre a) throws ErreurVerif {
-		switch(a.getNoeud()) {
-		case Ident:
-			if(env.chercher(a.getChaine()) == null ) {
-				Defn def = Defn.creationVar(getTypeDecl(aDecl.getFils2()));
-				env.enrichir(a.getChaine().toLowerCase(), def);
-			}
-			else {
-				ErreurContext e = ErreurContext.ErreurDejaDeclare;
-				e.leverErreurContext(null, a.getNumLigne());
-			}
-			if( a.getChaine().toLowerCase().equals("integer") 
-					||a.getChaine().toLowerCase().equals("boolean")
-					||a.getChaine().toLowerCase().equals("false")
-					||a.getChaine().toLowerCase().equals("true")
-					||a.getChaine().toLowerCase().equals("max_int")
-					||a.getChaine().toLowerCase().equals("real") )  {
-				ErreurContext e = ErreurContext.ErreurNatureIDENT;
-				e.leverErreurContext(null, a.getNumLigne());
-			}
-			a.setDecor(new Decor (Defn.creationVar(getTypeDecl(aDecl.getFils2()))));
-			break;
-		default:
-			throw new ErreurInterneVerif("Arbre incorrect dans verifier_IDENT");
+	/**************************************************************************
+	 * IDENT
+	 **************************************************************************/
+	private void verifier_IDENT(Arbre a, Type t) throws ErreurVerif {
+		/* On vérifie que l'identificateur n'est pas déjà utilisé */
+		if(env.chercher(a.getChaine()) != null) {
+			/* ERREUR : Identificateur déjà utilisé */
+			ErreurContext.ErreurDejaDeclare.leverErreurContext(null, a.getNumLigne());
 		}
+		
+		/* On enrichie l'environnement avec ce nouvel identificateur */
+		Defn def_ident = Defn.creationVar(t);
+		env.enrichir(a.getChaine(), def_ident);
+		
+		/* On décore le noeud avec ces informations */
+		a.setDecor(new Decor(def_ident));
 	}
 	
-	private void verifier_TYPE(Arbre a) throws ErreurVerif {
+	/**************************************************************************
+	 * TYPE
+	 **************************************************************************/
+	private Type verifier_TYPE(Arbre a) throws ErreurVerif {
 		switch(a.getNoeud()) {
+		/* Dans le cas d'un identificateur, vérifier que c'est bien un identificateur de type */
 		case Ident:
-				if( ! (a.getChaine().toLowerCase().equals("integer") 
-						||a.getChaine().toLowerCase().equals("boolean")
-						||a.getChaine().toLowerCase().equals("real") ) ) {
-					ErreurContext e = ErreurContext.ErreurNatureIDENT;
-					e.leverErreurContext(null, a.getNumLigne());
-				}
-			break;
-		case Intervalle:
-			if(a.getArite()!=2) {
-				ErreurContext e = ErreurContext.ErreurArite;
-				e.leverErreurContext(null, a.getNumLigne());
-			}
-			if(a.getFils1().getNoeud()!=Noeud.Entier || a.getFils2().getNoeud()!=Noeud.Entier ) {
-				ErreurContext e = ErreurContext.ErreurType;
-				e.leverErreurContext(null, a.getNumLigne());
-			}
-			break;
-		case Tableau:
-			verifier_TYPE_INTERVALLE(a.getFils1());
-			verifier_TYPE(a.getFils2());
 
-			break;
+			Defn def;
+			if((def = env.chercher(a.getChaine())) == null) {
+				/* ERREUR : Identificateur non déclaré */
+				ErreurContext.ErreurNonRepertoriee.leverErreurContext(null, a.getNumLigne());
+			}
+			else if(def.getNature() != NatureDefn.Type) {
+				/* ERREUR : Pas un identificateur de type */
+				ErreurContext.ErreurIdentificateurTypeNonReconnu.leverErreurContext(null, a.getNumLigne());
+			}
+			
+			/* Retourner le type de l'identificateur */
+			return def.getType();
+			
+		/* Dans le cas d'un intervalle, on retourne le type d'intervalle */
+		case Intervalle:
+			return verifier_TYPE_INTERVALLE(a);
+			
+		/* Dans le cas d'un tableau, il faut vérifier l'intervalle et renvoyer le type du tableau */
+		case Tableau:
+			Type type_inter = verifier_TYPE_INTERVALLE(a.getFils1());
+			Type type_elem = verifier_TYPE(a.getFils2());
+			
+			return Type.creationArray(type_inter, type_elem);
+
 		default:
 			throw new ErreurInterneVerif("Arbre incorrect dans verifier_TYPE");
 		}
 	}
-	private void verifier_TYPE_INTERVALLE(Arbre a) throws ErreurVerif {
-		switch(a.getNoeud()) {
-		case Intervalle:
-			verifier_EXP_CONST(a.getFils1());
-			verifier_EXP_CONST(a.getFils2());
-			break;
-		default:
-			throw new ErreurInterneVerif("Arbre incorrect dans verifier_TYPE_INTERVALLE");
-		}
+	
+	/**************************************************************************
+	 * TYPE_INTERVALLE
+	 **************************************************************************/
+	private Type verifier_TYPE_INTERVALLE(Arbre a) throws ErreurVerif {
+
+		int b_inf = verifier_EXP_CONST(a.getFils1());
+		int b_sup = verifier_EXP_CONST(a.getFils2());
+		
+		return Type.creationInterval(b_inf, b_sup);
 	}
 
-	private void verifier_EXP_CONST(Arbre a) throws ErreurVerif {
+	/**************************************************************************
+	 * EXP_CONST
+	 **************************************************************************/
+	private int verifier_EXP_CONST(Arbre a) throws ErreurVerif {
 		switch(a.getNoeud()) {
+		/* Dans le cas d'un identificateur, il faut vérifier que c'est un identificateur constant de type entier */
 		case Ident:
-
-			break;
+			Defn def;
+			if((def = env.chercher(a.getChaine())) == null) {
+				/* ERREUR : Identificateur non déclaré */
+				ErreurContext.ErreurNonRepertoriee.leverErreurContext(null, a.getNumLigne());
+			}
+			else if(def.getNature() != NatureDefn.ConstInteger) {
+				/* ERREUR : Pas un identificateur de constante entière */
+				ErreurContext.ErreurType.leverErreurContext(null, a.getNumLigne());
+			}
+			
+			return def.getValeurInteger();
+			
+		/* Dans le cas d'un entier on retourne simlement la valeur */
 		case Entier:
-
-			break;
+			return a.getEntier();
+		
 		case PlusUnaire:
-			verifier_EXP_CONST(a.getFils1());
+			return verifier_EXP_CONST(a.getFils1());
 
-			break;
 		case MoinsUnaire:
-			verifier_EXP_CONST(a.getFils1());
+			return verifier_EXP_CONST(a.getFils1());
 
-			break;
 		default:
 			throw new ErreurInterneVerif("Arbre incorrect dans verifier_EXP_CONST");
 		}
 	}
-
-
-
-
 
 	/**************************************************************************
 	 * LISTE_INST
@@ -687,14 +673,5 @@ public class Verif {
 			throw new ErreurInterneVerif("Arbre incorrect dans verifier_PAS");
 		}
 	}
-
-
-
-
-
-	// ------------------------------------------------------------------------
-	// COMPLETER les operations de vérifications et de décoration pour toutes 
-	// les constructions d'arbres
-	// ------------------------------------------------------------------------
 
 }
