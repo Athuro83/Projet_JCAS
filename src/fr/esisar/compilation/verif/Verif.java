@@ -91,6 +91,10 @@ public class Verif {
 
 	/**************************************************************************
 	 * DECL
+	 * 
+	 * Vérifier une déclaration.
+	 * Vérifie d'abord la règle TYPE pour pouvoir remonter le type et décorer
+	 * les identificateurs rencontrés dans la LISTE_IDENT
 	 **************************************************************************/
 	private void verifier_DECL(Arbre a) throws ErreurVerif {
 		switch(a.getNoeud()) {
@@ -113,7 +117,7 @@ public class Verif {
 			
 		case ListeIdent:
 			verifier_LISTE_IDENT(a.getFils1(), type);
-			verifier_IDENT(a.getFils2(), type);
+			verifier_IDENT(a.getFils2(), type, true);
 			break;
 			
 		default:
@@ -123,24 +127,42 @@ public class Verif {
 	
 	/**************************************************************************
 	 * IDENT
+	 * 
+	 * Vérifier et décorer un identificateur
 	 **************************************************************************/
-	private void verifier_IDENT(Arbre a, Type t) throws ErreurVerif {
-		/* On vérifie que l'identificateur n'est pas déjà utilisé */
-		if(env.chercher(a.getChaine()) != null) {
-			/* ERREUR : Identificateur déjà utilisé */
-			ErreurContext.ErreurDejaDeclare.leverErreurContext(null, a.getNumLigne());
+	private void verifier_IDENT(Arbre a, Type t, boolean estDECL) throws ErreurVerif {
+		
+		if(estDECL) {
+			/* On vérifie que l'identificateur n'est pas déjà utilisé */
+			if(env.chercher(a.getChaine()) != null) {
+				/* ERREUR : Identificateur déjà utilisé */
+				ErreurContext.ErreurDejaDeclare.leverErreurContext(null, a.getNumLigne());
+			}
+			
+			/* On enrichie l'environnement avec ce nouvel identificateur */
+			Defn def_ident = Defn.creationVar(t);
+			env.enrichir(a.getChaine(), def_ident);
+			
+			/* On décore le noeud avec ces informations */
+			a.setDecor(new Decor(def_ident));
 		}
-		
-		/* On enrichie l'environnement avec ce nouvel identificateur */
-		Defn def_ident = Defn.creationVar(t);
-		env.enrichir(a.getChaine(), def_ident);
-		
-		/* On décore le noeud avec ces informations */
-		a.setDecor(new Decor(def_ident));
+		else {
+			/* On vérifie que l'identificateur est bien déclaré */
+			Defn def;
+			if((def = env.chercher(a.getChaine())) == null) {
+				/* ERREUR : Identificateur non déclaré ! */
+				ErreurContext.ErreurNonRepertoriee.leverErreurContext(null, a.getNumLigne());
+			}
+			
+			/* On décore l'identificateur avec sa Defn et son Type */
+			a.setDecor(new Decor(def, def.getType()));
+		}
 	}
 	
 	/**************************************************************************
 	 * TYPE
+	 * 
+	 * Vérifier un type et le retourner sous forme d'objet Type
 	 **************************************************************************/
 	private Type verifier_TYPE(Arbre a) throws ErreurVerif {
 		switch(a.getNoeud()) {
@@ -226,94 +248,126 @@ public class Verif {
 	 **************************************************************************/
 	void verifier_LISTE_INST(Arbre a) throws ErreurVerif {
 		switch (a.getNoeud()) {
+		
 		case Vide: 
-			break	; 
+			break;
+			
 		case ListeInst:
 			verifier_LISTE_INST(a.getFils1()); 
 			verifier_INST(a.getFils2());
-			break	;
+			break;
+			
 		default	: 
 			throw new ErreurInterneVerif( "Arbre incorrect dans verifier_LISTE_INST")  ; 
 		} 
 	}
 
+	/**************************************************************************
+	 * INST
+	 **************************************************************************/
 	private void verifier_INST(Arbre a) throws ErreurVerif {
 		switch(a.getNoeud()) {
+		
 		case Nop:
 			break;
+			
 		case Affect:
-			if(a.getArite()!=2) {
-				ErreurContext e = ErreurContext.ErreurArite;
-				e.leverErreurContext(null, a.getNumLigne());
-			}
+			//System.out.println("Affect !");
+			/* Vérification de la grammaire */
 			verifier_PLACE(a.getFils1());
 			verifier_EXP(a.getFils2());
 			
-			Type t1,t2;
-			Decor dec = a.getFils2().getDecor();
-			
-			/* Déterminer le type de la PLACE */
-			dec = a.getFils1().getDecor();
-			if(dec != null) {
-				t1 = dec.getType();
-				if(t1 == null) t1 = dec.getDefn().getType();
-			}
-			else {
-				switch(a.getFils1().getNoeud()) {
-				
-					case Entier:
-						t1 = Type.Integer;
-						break;
-						
-					case Reel:
-						t1 = Type.Real;
-						break;
-						
-					case Chaine:
-						t1 = Type.String;
-						break;
-						
-					default:
-						throw new ErreurInterneVerif( "Noeud sans décor dans verifier_INST")  ; 
-				}
-			}
-
-			
-			/* Déterminer le type de l'EXP */
-			dec = a.getFils2().getDecor();
-			if(dec != null) {
-				t2 = dec.getType();
-				if(t2 == null) t2 = dec.getDefn().getType();
-			}
-			else {
-				switch(a.getFils2().getNoeud()) {
-				
-					case Entier:
-						t2 = Type.Integer;
-						break;
-						
-					case Reel:
-						t2 = Type.Real;
-						break;
-						
-					case Chaine:
-						t2 = Type.String;
-						break;
-						
-					default:
-						throw new ErreurInterneVerif( "Noeud sans décor dans verifier_INST")  ; 
-				}
+			/* Vérification du contexte */
+			//System.out.println("Contexte");
+			ResultatAffectCompatible res_affect = ReglesTypage.affectCompatible(getTypeNoeud(a.getFils1()), getTypeNoeud(a.getFils2()));
+			//System.out.println("Res affect : " + res_affect);
+			if(!res_affect.getOk()) {
+				/* ERREUR : Affectation illégale ! */
+				ErreurContext.ErreurAffectation.leverErreurContext(null, a.getNumLigne());
 			}
 			
-			//System.out.println("Type :" + t2);
-			ResultatAffectCompatible rac = ReglesTypage.affectCompatible(t1, t2);
-			//System.out.println("Vérif contexte :" + rac);
-			if(!rac.getOk()) {
-				ErreurContext e = ErreurContext.ErreurAffectation;
-				e.leverErreurContext(null, a.getNumLigne());
+			//System.out.println("Conversion");
+			if(res_affect.getConv2()) {
+				/* Ajout d'un noeud conversion */
+				addNoeudConv(a, 2);
 			}
-			a.setDecor(new Decor(t1));
-			//System.out.println("Décor en place !");
+			
+			//System.out.println("Déco");
+			/* Décoration du noeud avec le type */
+			a.setDecor(new Decor(getTypeNoeud(a.getFils1())));
+			
+//			/*if(a.getArite()!=2) {
+//				ErreurContext e = ErreurContext.ErreurArite;
+//				e.leverErreurContext(null, a.getNumLigne());
+//			}*/
+//			verifier_PLACE(a.getFils1());
+//			verifier_EXP(a.getFils2());
+//			
+//			Type t1,t2;
+//			Decor dec = a.getFils2().getDecor();
+//			
+//			/* Déterminer le type de la PLACE */
+//			dec = a.getFils1().getDecor();
+//			if(dec != null) {
+//				t1 = dec.getType();
+//				if(t1 == null) t1 = dec.getDefn().getType();
+//			}
+//			else {
+//				switch(a.getFils1().getNoeud()) {
+//				
+//					case Entier:
+//						t1 = Type.Integer;
+//						break;
+//						
+//					case Reel:
+//						t1 = Type.Real;
+//						break;
+//						
+//					case Chaine:
+//						t1 = Type.String;
+//						break;
+//						
+//					default:
+//						throw new ErreurInterneVerif( "Noeud sans décor dans verifier_INST")  ; 
+//				}
+//			}
+//
+//			
+//			/* Déterminer le type de l'EXP */
+//			dec = a.getFils2().getDecor();
+//			if(dec != null) {
+//				t2 = dec.getType();
+//				if(t2 == null) t2 = dec.getDefn().getType();
+//			}
+//			else {
+//				switch(a.getFils2().getNoeud()) {
+//				
+//					case Entier:
+//						t2 = Type.Integer;
+//						break;
+//						
+//					case Reel:
+//						t2 = Type.Real;
+//						break;
+//						
+//					case Chaine:
+//						t2 = Type.String;
+//						break;
+//						
+//					default:
+//						throw new ErreurInterneVerif( "Noeud sans décor dans verifier_INST")  ; 
+//				}
+//			}
+//			
+//			//System.out.println("Type :" + t2);
+//			ResultatAffectCompatible rac = ReglesTypage.affectCompatible(t1, t2);
+//			//System.out.println("Vérif contexte :" + rac);
+//			if(!rac.getOk()) {
+//				ErreurContext e = ErreurContext.ErreurAffectation;
+//				e.leverErreurContext(null, a.getNumLigne());
+//			}
+//			a.setDecor(new Decor(t1));
+//			//System.out.println("Décor en place !");
 			break;
 			
 		case Pour:
@@ -409,37 +463,24 @@ public class Verif {
 			throw new ErreurInterneVerif("Arbre incorrect dans verifier_IDENT");
 		}
 	}
-
+	
+	/**************************************************************************
+	 * PLACE
+	 **************************************************************************/
 	private void verifier_PLACE(Arbre a) throws ErreurVerif {
 		switch(a.getNoeud()) {
+		
 		case Ident:
-			Defn def;
-			if((def = env.chercher(a.getChaine())) == null ) {
-				ErreurContext e = ErreurContext.ErreurPasDeclare;
-				e.leverErreurContext(null, a.getNumLigne());
-			}
-			a.setDecor(new Decor (def));
-			/*
-			if( a.getChaine().toLowerCase().equals("integer") 
-					||a.getChaine().toLowerCase().equals("boolean")
-					||a.getChaine().toLowerCase().equals("false")
-					||a.getChaine().toLowerCase().equals("true")
-					||a.getChaine().toLowerCase().equals("max_int")
-					||a.getChaine().toLowerCase().equals("real") )  {
-				ErreurContext e = ErreurContext.ErreurNatureIDENT;
-				e.leverErreurContext(null, a.getNumLigne());
-			}
-			*/
+			//System.out.println("Ident !");
+			/* On vérifie et décore l'identificateur */
+			verifier_IDENT(a, null, false);
 			break;
+			
 		case Index:
-			if(a.getArite()!=2) {
-				ErreurContext e = ErreurContext.ErreurArite;
-				e.leverErreurContext(null, a.getNumLigne());
-			}
 			verifier_PLACE(a.getFils1());
 			verifier_EXP(a.getFils2());
-
 			break;
+			
 		default:
 			throw new ErreurInterneVerif("Arbre incorrect dans verifier_PLACE");
 		}
@@ -484,6 +525,7 @@ public class Verif {
 		ResultatBinaireCompatible RBC;
 		ResultatUnaireCompatible RUC;
 		switch(a.getNoeud()) {
+		
 		case Et :
 		case Ou :
 			if(a.getArite()!=2) {
@@ -602,20 +644,27 @@ public class Verif {
 				e.leverErreurContext(null, a.getNumLigne());
 				return(RUC.getTypeRes());
 			}
+			
 		case Index:
 			return verifier_INDEX(a);
+			
 		case Conversion:
 			a.setDecor(new Decor(Type.Real));
 			return Type.Real;
+			
 		case Entier:
+			//System.out.println("Entier");
 			a.setDecor(new Decor(Type.Integer));
 			return Type.Integer;
+			
 		case Reel:
 			a.setDecor(new Decor(Type.Real));
 			return Type.Real;
+			
 		case Chaine:
 			a.setDecor(new Decor(Type.String));
 			return Type.String; //on est pas sûrs
+			
 		case Ident:
 			if(env.chercher(a.getChaine()) == null ) {
 				ErreurContext e = ErreurContext.ErreurPasDeclare;
@@ -673,5 +722,40 @@ public class Verif {
 			throw new ErreurInterneVerif("Arbre incorrect dans verifier_PAS");
 		}
 	}
-
+	
+	// Autres fonctions
+	
+	/**************************************************************************
+	 * getTypeNoeud
+	 * 
+	 * Retourne le type du noeud, en se basant sur son décor
+	 **************************************************************************/
+	private Type getTypeNoeud(Arbre a) {
+		
+		Decor dec;
+		if((dec = a.getDecor()) == null) {
+			/* ERREUR : Pas de décor ! */
+			throw new ErreurInterneVerif("Pas de décor sur noeud " + a);
+		}
+		else if(dec.getType() == null) {
+			/* ERREUR : Pas de type dans le décor ! */
+			throw new ErreurInterneVerif("Pas de type dans le décor du noeud " + a);
+		}
+		
+		return dec.getType();
+	}
+	
+	/**************************************************************************
+	 * addNoeudConv
+	 * 
+	 * Ajoute un noeud Convertion entre le noeud a et son fils d'indice numFils
+	 **************************************************************************/
+	private void addNoeudConv(Arbre a, int numFils) {
+		/* Créer le noeud */
+		Arbre conv = Arbre.creation1(Noeud.Conversion, a.getFils(numFils), a.getNumLigne());
+		/* Le décorer */
+		conv.setDecor(new Decor(Type.Real));
+		/* Le positionner */
+		a.setFils(numFils, conv);
+	}
 }

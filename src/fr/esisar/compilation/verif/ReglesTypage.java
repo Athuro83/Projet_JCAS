@@ -82,6 +82,7 @@ public class ReglesTypage {
 	   			break;
 		}
 	   
+		//System.out.println("Res avant " + result);
 		return result; 
 }
 
