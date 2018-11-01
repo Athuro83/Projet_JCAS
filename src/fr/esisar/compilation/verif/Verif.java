@@ -253,8 +253,8 @@ public class Verif {
 			break;
 			
 		case ListeInst:
-			verifier_LISTE_INST(a.getFils1()); 
 			verifier_INST(a.getFils2());
+			verifier_LISTE_INST(a.getFils1()); 
 			break;
 			
 		default	: 
@@ -272,15 +272,12 @@ public class Verif {
 			break;
 			
 		case Affect:
-			//System.out.println("Affect !");
 			/* Vérification de la grammaire */
 			verifier_PLACE(a.getFils1());
 			verifier_EXP(a.getFils2());
 			
 			/* Vérification du contexte */
-			//System.out.println("Contexte");
 			ResultatAffectCompatible res_affect = ReglesTypage.affectCompatible(getTypeNoeud(a.getFils1()), getTypeNoeud(a.getFils2()));
-			//System.out.println("Res affect : " + res_affect);
 			if(!res_affect.getOk()) {
 				/* ERREUR : Affectation illégale ! */
 				ErreurContext.ErreurAffectation.leverErreurContext(null, a.getNumLigne());
@@ -292,7 +289,6 @@ public class Verif {
 				addNoeudConv(a, 2);
 			}
 			
-			//System.out.println("Déco");
 			/* Décoration du noeud avec le type */
 			a.setDecor(new Decor(getTypeNoeud(a.getFils1())));
 			
@@ -471,7 +467,6 @@ public class Verif {
 		switch(a.getNoeud()) {
 		
 		case Ident:
-			//System.out.println("Ident !");
 			/* On vérifie et décore l'identificateur */
 			verifier_IDENT(a, null, false);
 			break;
@@ -526,8 +521,45 @@ public class Verif {
 		ResultatUnaireCompatible RUC;
 		switch(a.getNoeud()) {
 		
+		/* Tous les opérateurs binaires */
 		case Et :
 		case Ou :
+		case Plus:
+		case Moins:
+		case Mult:
+		case DivReel:
+		case Reste:
+		case Quotient:
+		case Egal :
+		case Inf :
+		case SupEgal :
+		case InfEgal :
+		case Sup :
+		case NonEgal :
+			/* Vérification de la grammaire */
+			verifier_EXP(a.getFils1());
+			verifier_EXP(a.getFils2());
+			
+			/* Vérification du contexte */
+			ResultatBinaireCompatible res_binaire = ReglesTypage.binaireCompatible(a.getNoeud(), getTypeNoeud(a.getFils1()), getTypeNoeud(a.getFils2()));
+			if(!res_binaire.getOk()) {
+				/* ERREUR: Opération binaire illégale ! */
+				ErreurContext.ErreurType.leverErreurContext(null, a.getNumLigne());
+			}
+			
+			/* Ajout de noeuds Conversion si nécessaire */
+			if(res_binaire.getConv1()) {
+				addNoeudConv(a, 1);
+			}
+			else if(res_binaire.getConv2()) {
+				addNoeudConv(a, 2);
+			}
+			
+			/* Décor du noeud */
+			a.setDecor(new Decor(res_binaire.getTypeRes()));
+			return res_binaire.getTypeRes();
+			
+			/*
 			if(a.getArite()!=2) {
 				ErreurContext e = ErreurContext.ErreurArite;
 				e.leverErreurContext(null, a.getNumLigne());
@@ -542,13 +574,9 @@ public class Verif {
 				e.leverErreurContext(null, a.getNumLigne());
 				return(RBC.getTypeRes());
 			}
+			*/
 			
-		case Egal :
-		case Inf :
-		case SupEgal :
-		case InfEgal :
-		case Sup :
-		case NonEgal :
+			/*
 			if(a.getArite()!=2) {
 				ErreurContext e = ErreurContext.ErreurArite;
 				e.leverErreurContext(null, a.getNumLigne());
@@ -576,13 +604,9 @@ public class Verif {
 				e.leverErreurContext(null, a.getNumLigne());
 				return(RBC.getTypeRes());
 			}
-			
-		case Plus:
-		case Moins:
-		case Mult:
-		case DivReel:
-		case Reste:
-		case Quotient:
+			*/
+
+			/*
 			if(a.getArite()!=2) {
 				ErreurContext e = ErreurContext.ErreurArite;
 				e.leverErreurContext(null, a.getNumLigne());
@@ -611,9 +635,27 @@ public class Verif {
 				e.leverErreurContext(null, a.getNumLigne());
 				return(RBC.getTypeRes());
 			}
+			*/
 			
 		case PlusUnaire:
 		case MoinsUnaire:
+		case Non:
+			/* Vérifier la grammaire */
+			verifier_EXP(a.getFils1());
+			
+			/* Vérifier le contexte */
+			ResultatUnaireCompatible res_unaire = ReglesTypage.unaireCompatible(a.getNoeud(), getTypeNoeud(a.getFils1()));
+			
+			if(!res_unaire.getOk()) {
+				/* ERREUR: Opération unaire illégale ! */
+				ErreurContext.ErreurType.leverErreurContext(null, a.getNumLigne());
+			}
+			
+			/* Décoration du noeud */
+			a.setDecor(new Decor(res_unaire.getTypeRes()));
+			return res_unaire.getTypeRes();
+			
+			/*
 			if(a.getArite()!=1) {
 				ErreurContext e = ErreurContext.ErreurArite;
 				e.leverErreurContext(null, a.getNumLigne());
@@ -628,8 +670,9 @@ public class Verif {
 				e.leverErreurContext(null, a.getNumLigne());
 				return(RUC.getTypeRes());
 			}
+			*/
 
-		case Non:
+			/*
 			if(a.getArite()!=1) {
 				ErreurContext e = ErreurContext.ErreurArite;
 				e.leverErreurContext(null, a.getNumLigne());
@@ -644,11 +687,16 @@ public class Verif {
 				e.leverErreurContext(null, a.getNumLigne());
 				return(RUC.getTypeRes());
 			}
+			*/
 			
 		case Index:
 			return verifier_INDEX(a);
 			
 		case Conversion:
+			/* Vérifier la grammaire */
+			verifier_EXP(a.getFils1());
+			
+			/* Décorer le noeud */
 			a.setDecor(new Decor(Type.Real));
 			return Type.Real;
 			
@@ -666,13 +714,15 @@ public class Verif {
 			return Type.String; //on est pas sûrs
 			
 		case Ident:
-			if(env.chercher(a.getChaine()) == null ) {
+			/*if(env.chercher(a.getChaine()) == null ) {
 				ErreurContext e = ErreurContext.ErreurPasDeclare;
 				e.leverErreurContext(null, a.getNumLigne());
 			}
 			Defn defn = env.chercher(a.getChaine().toLowerCase());
 			a.setDecor(new Decor(defn));
-			return(defn.getType());
+			*/
+			verifier_IDENT(a, null, false);
+			return a.getDecor().getType();
 			
 		default:
 			throw new ErreurInterneVerif("Arbre incorrect dans verifier_EXP");
@@ -735,11 +785,11 @@ public class Verif {
 		Decor dec;
 		if((dec = a.getDecor()) == null) {
 			/* ERREUR : Pas de décor ! */
-			throw new ErreurInterneVerif("Pas de décor sur noeud " + a);
+			throw new ErreurInterneVerif("Pas de décor sur noeud " + a + " (ligne " + a.getNumLigne() + ")");
 		}
 		else if(dec.getType() == null) {
 			/* ERREUR : Pas de type dans le décor ! */
-			throw new ErreurInterneVerif("Pas de type dans le décor du noeud " + a);
+			throw new ErreurInterneVerif("Pas de type dans le décor du noeud " + a + " (ligne " + a.getNumLigne() + ")");
 		}
 		
 		return dec.getType();
