@@ -242,7 +242,7 @@ inst ::= NULL
    :}
    |  IF exp:e1 THEN liste_inst:l1 END
    {:
-     	RESULT = Arbre.creation2(Noeud.Si, e1, l1, e1.getNumLigne());
+     	RESULT = Arbre.creation3(Noeud.Si, e1, l1, Arbre.creation0(Noeud.Vide, e1.getNumLigne()), e1.getNumLigne());
    :}
    |  IF exp:e1 THEN liste_inst:l1 ELSE liste_inst:l2 END
    {:
