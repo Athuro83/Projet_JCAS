@@ -75,15 +75,22 @@ public class Verif {
 
 	/**************************************************************************
 	 * LISTE_DECL
+	 * 
+	 * Vérifie une liste de déclarations.
+	 * Examine les déclarations dans l'ordre dans lequel elles sont faîtes dans
+	 * le programme.
 	 **************************************************************************/
 	private void verifier_LISTE_DECL(Arbre a) throws ErreurVerif {
 		switch(a.getNoeud()) {
+		
 		case Vide:
 			break;
+			
 		case ListeDecl:
 			verifier_LISTE_DECL(a.getFils1());
 			verifier_DECL(a.getFils2());
 			break;
+			
 		default:
 			throw new ErreurInterneVerif("Arbre incorrect dans verifier_LISTE_DECL");
 		}
@@ -94,7 +101,7 @@ public class Verif {
 	 * 
 	 * Vérifier une déclaration.
 	 * Vérifie d'abord la règle TYPE pour pouvoir remonter le type et décorer
-	 * les identificateurs rencontrés dans la LISTE_IDENT
+	 * les identificateurs rencontrés dans la LISTE_IDENT.
 	 **************************************************************************/
 	private void verifier_DECL(Arbre a) throws ErreurVerif {
 		switch(a.getNoeud()) {
@@ -109,6 +116,9 @@ public class Verif {
 
 	/**************************************************************************
 	 * LISTE_IDENT
+	 * 
+	 * Vérifier une liste d'identificateurs.
+	 * Examine les identificateurs dans l'ordre dans lequel ils sont déclarés.
 	 **************************************************************************/
 	private void verifier_LISTE_IDENT(Arbre a, Type type) throws ErreurVerif {
 		switch(a.getNoeud()) {
@@ -128,7 +138,10 @@ public class Verif {
 	/**************************************************************************
 	 * IDENT
 	 * 
-	 * Vérifier et décorer un identificateur
+	 * Vérifier et décorer un identificateur.
+	 * Le comportement varie selon que l'identificateur se trouve dans la partie
+	 * "déclaration" (règle LISTE_DECL) ou dans la partie "instructions"
+	 * (règle LISTE_INST).
 	 **************************************************************************/
 	private void verifier_IDENT(Arbre a, Type t, boolean estDECL) throws ErreurVerif {
 		
@@ -150,15 +163,9 @@ public class Verif {
 			/* On vérifie que l'identificateur est bien déclaré */
 			Defn def;
 			if((def = env.chercher(a.getChaine())) == null) {
-				/* ERREUR : Identificateur non déclaré ! */
+				/* ERREUR CONTEXTE : Identificateur non déclaré ! */
 				ErreurContext.ErreurNonRepertoriee.leverErreurContext(null, a.getNumLigne());
 			}
-			
-//			/* Et que c'est un identificateur de variable */
-//			if(def.getNature() != NatureDefn.Var) {
-//				/* ERREUR : Pas un identificateur de variable */
-//				ErreurContext.ErreurNatureIDENT.leverErreurContext(null, a.getNumLigne());
-//			}
 			
 			/* On décore l'identificateur avec sa Defn et son Type */
 			a.setDecor(new Decor(def, def.getType()));
@@ -168,7 +175,7 @@ public class Verif {
 	/**************************************************************************
 	 * TYPE
 	 * 
-	 * Vérifier un type et le retourner sous forme d'objet Type
+	 * Vérifier un type et le retourner sous forme d'objet Type.
 	 **************************************************************************/
 	private Type verifier_TYPE(Arbre a) throws ErreurVerif {
 		switch(a.getNoeud()) {
@@ -177,7 +184,7 @@ public class Verif {
 
 			Defn def;
 			if((def = env.chercher(a.getChaine())) == null) {
-				/* ERREUR : Identificateur non déclaré */
+				/* ERREUR CONTEXTE : Identificateur non déclaré */
 				ErreurContext.ErreurNonRepertoriee.leverErreurContext(null, a.getNumLigne());
 			}
 			else if(def.getNature() != NatureDefn.Type) {
@@ -206,6 +213,8 @@ public class Verif {
 	
 	/**************************************************************************
 	 * TYPE_INTERVALLE
+	 * 
+	 * Vérifier la déclaration d'un intervalle et renvoyer le Type correspondant.
 	 **************************************************************************/
 	private Type verifier_TYPE_INTERVALLE(Arbre a) throws ErreurVerif {
 
@@ -218,6 +227,8 @@ public class Verif {
 
 	/**************************************************************************
 	 * EXP_CONST
+	 * 
+	 * Vérifier une expression constante et renvoyer sa valeur numérique.
 	 **************************************************************************/
 	private int verifier_EXP_CONST(Arbre a) throws ErreurVerif {
 		switch(a.getNoeud()) {
@@ -252,6 +263,9 @@ public class Verif {
 
 	/**************************************************************************
 	 * LISTE_INST
+	 * 
+	 * Vérifier une liste d'instruction.
+	 * Examine les instructions dans l'ordre du programme.
 	 **************************************************************************/
 	void verifier_LISTE_INST(Arbre a) throws ErreurVerif {
 		switch (a.getNoeud()) {
@@ -260,8 +274,8 @@ public class Verif {
 			break;
 			
 		case ListeInst:
-			verifier_INST(a.getFils2());
 			verifier_LISTE_INST(a.getFils1()); 
+			verifier_INST(a.getFils2());
 			break;
 			
 		default	: 
@@ -271,6 +285,8 @@ public class Verif {
 
 	/**************************************************************************
 	 * INST
+	 * 
+	 * Vérifier une instruction.
 	 **************************************************************************/
 	private void verifier_INST(Arbre a) throws ErreurVerif {
 		switch(a.getNoeud()) {
@@ -304,101 +320,16 @@ public class Verif {
 			}
 			
 			/* Décoration du noeud avec le type */
-			a.setDecor(new Decor(getTypeNoeud(a.getFils1())));
-			
-//			/*if(a.getArite()!=2) {
-//				ErreurContext e = ErreurContext.ErreurArite;
-//				e.leverErreurContext(null, a.getNumLigne());
-//			}*/
-//			verifier_PLACE(a.getFils1());
-//			verifier_EXP(a.getFils2());
-//			
-//			Type t1,t2;
-//			Decor dec = a.getFils2().getDecor();
-//			
-//			/* Déterminer le type de la PLACE */
-//			dec = a.getFils1().getDecor();
-//			if(dec != null) {
-//				t1 = dec.getType();
-//				if(t1 == null) t1 = dec.getDefn().getType();
-//			}
-//			else {
-//				switch(a.getFils1().getNoeud()) {
-//				
-//					case Entier:
-//						t1 = Type.Integer;
-//						break;
-//						
-//					case Reel:
-//						t1 = Type.Real;
-//						break;
-//						
-//					case Chaine:
-//						t1 = Type.String;
-//						break;
-//						
-//					default:
-//						throw new ErreurInterneVerif( "Noeud sans décor dans verifier_INST")  ; 
-//				}
-//			}
-//
-//			
-//			/* Déterminer le type de l'EXP */
-//			dec = a.getFils2().getDecor();
-//			if(dec != null) {
-//				t2 = dec.getType();
-//				if(t2 == null) t2 = dec.getDefn().getType();
-//			}
-//			else {
-//				switch(a.getFils2().getNoeud()) {
-//				
-//					case Entier:
-//						t2 = Type.Integer;
-//						break;
-//						
-//					case Reel:
-//						t2 = Type.Real;
-//						break;
-//						
-//					case Chaine:
-//						t2 = Type.String;
-//						break;
-//						
-//					default:
-//						throw new ErreurInterneVerif( "Noeud sans décor dans verifier_INST")  ; 
-//				}
-//			}
-//			
-//			//System.out.println("Type :" + t2);
-//			ResultatAffectCompatible rac = ReglesTypage.affectCompatible(t1, t2);
-//			//System.out.println("Vérif contexte :" + rac);
-//			if(!rac.getOk()) {
-//				ErreurContext e = ErreurContext.ErreurAffectation;
-//				e.leverErreurContext(null, a.getNumLigne());
-//			}
-//			a.setDecor(new Decor(t1));
-//			//System.out.println("Décor en place !");
+			a.setDecor(new Decor(getTypeNoeud(a.getFils1())));			
 			break;
 			
 		case Pour:
-			/*
-			if(a.getArite()!=2) {
-				ErreurContext e = ErreurContext.ErreurArite;
-				e.leverErreurContext(null, a.getNumLigne());
-			}
-			*/
+			/* Vérification de la grammaire */
 			verifier_PAS(a.getFils1());
 			verifier_LISTE_INST(a.getFils2());
 			break;
 			
 		case TantQue:
-			/*
-			if(a.getArite()!=2) {
-				ErreurContext e = ErreurContext.ErreurArite;
-				e.leverErreurContext(null, a.getNumLigne());
-			}
-			*/
-			
 			/* Vérification de la grammaire */
 			verifier_EXP(a.getFils1());
 			verifier_LISTE_INST(a.getFils2());
@@ -408,42 +339,11 @@ public class Verif {
 			if(getTypeNoeud(a.getFils2()) != Type.Boolean) {
 				/* ERREUR CONTEXTE : Condition de type non booléen */
 				//TODO : Nouvelle erreur ?
-				throw new ErreurInterneVerif("Condition de type non booléen (ligne " + a.getNumLigne() + ")");
+				throw new ErreurInterneVerif("La condition n'est pas un booléen (ligne " + a.getNumLigne() + ")");
 			}
-			
-			/*
-			if(a.getFils1().getDecor().getType()!=Type.Boolean) {
-				ErreurContext e = ErreurContext.ErreurType;
-				e.leverErreurContext(null, a.getNumLigne());
-			}
-			*/
 			break;
 			
 		case Si:
-			/*
-			if(a.getArite()==3) {
-				verifier_EXP(a.getFils1());
-				verifier_LISTE_INST(a.getFils2());
-				verifier_LISTE_INST(a.getFils3());
-				if(a.getFils1().getDecor().getType()!=Type.Boolean) {
-					ErreurContext e = ErreurContext.ErreurType;
-					e.leverErreurContext(null, a.getNumLigne());
-				}
-			}
-			else if(a.getArite()==2){
-				verifier_EXP(a.getFils1());
-				verifier_LISTE_INST(a.getFils2());
-				if(a.getFils1().getDecor().getType()!=Type.Boolean) {
-					ErreurContext e = ErreurContext.ErreurType;
-					e.leverErreurContext(null, a.getNumLigne());
-				}
-			}
-			else {
-				ErreurContext e = ErreurContext.ErreurArite;
-				e.leverErreurContext(null, a.getNumLigne());
-			}
-			*/
-			
 			/* Vérification de la grammaire */
 			verifier_EXP(a.getFils1());
 			verifier_LISTE_INST(a.getFils2());
@@ -454,7 +354,7 @@ public class Verif {
 			if(getTypeNoeud(a.getFils1()) != Type.Boolean) {
 				/* ERREUR CONTEXTE : Condition de type non booléen */
 				//TODO : Nouvelle erreur ?
-				throw new ErreurInterneVerif("Condition de type non booléen (ligne " + a.getNumLigne() + ")");
+				throw new ErreurInterneVerif("La condition n'est pas un booléen (ligne " + a.getNumLigne() + ")");
 			}
 			break;
 			
@@ -466,31 +366,11 @@ public class Verif {
 			if(def_var_lue.getType() != Type.Real && def_var_lue.getType() != Type.Integer) {
 				/* ERREUR CONTEXTE : Tentative de lecture d'une variable de type invalide */
 				ErreurContext.ErreurVariableRead.leverErreurContext(null, a.getNumLigne());
-				//TODO : Nouvelle erreur ?
-				//throw new ErreurInterneVerif("Tentative de lecture d'une variable de type invalide (ligne " + a.getNumLigne() + ")");
 			}
-
-			/*
-			if(a.getArite()!=1) {
-				ErreurContext e = ErreurContext.ErreurArite;
-				e.leverErreurContext(null, a.getNumLigne());
-			}
-			
-			verifier_PLACE(a.getFils1(), false);
-			if(a.getFils1().getDecor().getType()!=Type.Integer || a.getFils1().getDecor().getType()!=Type.Real) {
-				ErreurContext e = ErreurContext.ErreurType;
-				e.leverErreurContext(null, a.getNumLigne());
-			}
-			*/
 			break;
 			
 		case Ecriture:
-			/*
-			if(a.getArite()!=1) {
-				ErreurContext e = ErreurContext.ErreurArite;
-				e.leverErreurContext(null, a.getNumLigne());
-			}
-			*/
+			/* Vérification de la grammaire */
 			verifier_LISTE_EXP(a.getFils1());
 			break;
 
@@ -501,36 +381,11 @@ public class Verif {
 			throw new ErreurInterneVerif("Arbre incorrect dans verifier_INST");
 		}
 	}
-
-/*
-	private void verifier_IDENT_util(Arbre a) throws ErreurVerif {
-		switch(a.getNoeud()) {
-		case Ident:
-			if(env.chercher(a.getChaine()) == null ) {
-				ErreurContext e = ErreurContext.ErreurPasDeclare;
-				e.leverErreurContext(null, a.getNumLigne());
-			}
-			if( a.getChaine().toLowerCase().equals("integer") 
-					||a.getChaine().toLowerCase().equals("boolean")
-					||a.getChaine().toLowerCase().equals("false")
-					||a.getChaine().toLowerCase().equals("true")
-					||a.getChaine().toLowerCase().equals("max_int")
-					||a.getChaine().toLowerCase().equals("real") )  {
-				ErreurContext e = ErreurContext.ErreurNatureIDENT;
-				e.leverErreurContext(null, a.getNumLigne());
-			}
-			Defn defn = env.chercher(a.getChaine().toLowerCase());
-			a.setDecor(new Decor(defn));
-		default:
-			throw new ErreurInterneVerif("Arbre incorrect dans verifier_IDENT");
-		}
-	}
-	*/
 	
 	/**************************************************************************
 	 * PLACE
 	 * 
-	 * Vérifier la règle PLACE, et retourner la nature de l'identificateur
+	 * Vérifier la règle PLACE, et retourner la def de l'identificateur associé.
 	 **************************************************************************/
 	private Defn verifier_PLACE(Arbre a, boolean setDecor) throws ErreurVerif {
 		switch(a.getNoeud()) {
@@ -542,7 +397,7 @@ public class Verif {
 			return getDefNoeud(a);
 			
 		case Index:
-			/* On fait remonter la nature du tableau */
+			/* On fait remonter la def du tableau */
 			return verifier_INDEX(a, setDecor);
 			
 		default:
@@ -552,6 +407,10 @@ public class Verif {
 
 	/**************************************************************************
 	 * LISTE_EXP
+	 * 
+	 * Vérifier une liste d'expression.
+	 * S'assure en particulier que le type des expressions est compatible avec
+	 * l'écriture.
 	 **************************************************************************/
 	private void verifier_LISTE_EXP(Arbre a) throws ErreurVerif {
 		switch(a.getNoeud()) {
@@ -566,20 +425,11 @@ public class Verif {
 			Type type_exp = getTypeNoeud(a.getFils2());
 			if(type_exp != Type.String && type_exp != Type.Real && type_exp != Type.Integer) {
 				/* ERREUR CONTEXTE : On essaye d'écrire autre chose qu'une chaîne, un entier ou un réel */
-				ErreurContext.ErreurType.leverErreurContext(null, a.getNumLigne());
+				ErreurContext.ErreurExpressionWrite.leverErreurContext(null, a.getNumLigne());
 			}
 			
 			/* Continuer avec la suite de la liste */
 			verifier_LISTE_EXP(a.getFils1());
-			
-			/*
-			verifier_LISTE_EXP(a.getFils1());
-			Type type = verifier_EXP(a.getFils2());
-			if(type!=Type.Integer && type != Type.Real && type != Type.String) {
-				ErreurContext e = ErreurContext.ErreurType;
-				e.leverErreurContext(null, a.getNumLigne());
-			}
-			*/
 			break;
 			
 		default:
@@ -605,7 +455,7 @@ public class Verif {
 		if(!res_index.getOk()) {
 			/* ERREUR : Indexation illégale ! */
 			//TODO: ajout erreur ?
-			throw new ErreurInterneVerif("Indexation illégale ligne " + a.getNumLigne() + ")");
+			throw new ErreurInterneVerif("Indexation illégale (ligne " + a.getNumLigne() + ")");
 		}
 		
 		/* Décorer le noeud si nécessaire */
@@ -621,8 +471,6 @@ public class Verif {
 	 * EXP
 	 **************************************************************************/
 	private Type verifier_EXP(Arbre a) throws ErreurVerif {
-		//ResultatBinaireCompatible RBC;
-		//ResultatUnaireCompatible RUC;
 		switch(a.getNoeud()) {
 		
 		/* Tous les opérateurs binaires */
@@ -648,6 +496,7 @@ public class Verif {
 			ResultatBinaireCompatible res_binaire = ReglesTypage.binaireCompatible(a.getNoeud(), getTypeNoeud(a.getFils1()), getTypeNoeud(a.getFils2()));
 			if(!res_binaire.getOk()) {
 				/* ERREUR: Opération binaire illégale ! */
+				System.out.println("Erreur flag 1 !\n Type gauche :" + getTypeNoeud(a.getFils1()) + "\n Type droite :" + getTypeNoeud(a.getFils2()) + "Noeud : " + a.getNoeud());
 				ErreurContext.ErreurType.leverErreurContext(null, a.getNumLigne());
 			}
 			
@@ -662,84 +511,7 @@ public class Verif {
 			/* Décor du noeud */
 			a.setDecor(new Decor(res_binaire.getTypeRes()));
 			return res_binaire.getTypeRes();
-			
-			/*
-			if(a.getArite()!=2) {
-				ErreurContext e = ErreurContext.ErreurArite;
-				e.leverErreurContext(null, a.getNumLigne());
-			}
-			RBC = ReglesTypage.binaireCompatible(a.getNoeud(), verifier_EXP(a.getFils1()), verifier_EXP(a.getFils2()));
-			if(RBC.getOk()) {
-				a.setDecor(new Decor(RBC.getTypeRes()));
-				return(RBC.getTypeRes());
-			}
-			else {
-				ErreurContext e = ErreurContext.ErreurAffectationBooleanAutre;
-				e.leverErreurContext(null, a.getNumLigne());
-				return(RBC.getTypeRes());
-			}
-			*/
-			
-			/*
-			if(a.getArite()!=2) {
-				ErreurContext e = ErreurContext.ErreurArite;
-				e.leverErreurContext(null, a.getNumLigne());
-			}
-			RBC = ReglesTypage.binaireCompatible(a.getNoeud(),verifier_EXP(a.getFils1()), verifier_EXP(a.getFils2()));
-			if(RBC.getOk()) {
-			
-				if(RBC.getConv1()) {
-					Arbre conversion = Arbre.creation1(Noeud.Conversion, a.getFils1(), a.getNumLigne());
-					a.setFils1(conversion);
-					conversion.setDecor(new Decor(Type.Real));
-					a.setDecor(new Decor(RBC.getTypeRes()));
-					return(RBC.getTypeRes());
-				}
-				else if (RBC.getConv2()) {
-					Arbre conversion = Arbre.creation1(Noeud.Conversion, a.getFils2(), a.getNumLigne());
-					a.setFils2(conversion);
-					conversion.setDecor(new Decor(Type.Real));
-					a.setDecor(new Decor(RBC.getTypeRes()));
-					return(RBC.getTypeRes());
-				}
-			}
-			else {
-				ErreurContext e = ErreurContext.ErreurAffectationBooleanAutre;
-				e.leverErreurContext(null, a.getNumLigne());
-				return(RBC.getTypeRes());
-			}
-			*/
 
-			/*
-			if(a.getArite()!=2) {
-				ErreurContext e = ErreurContext.ErreurArite;
-				e.leverErreurContext(null, a.getNumLigne());
-			}
-			RBC = ReglesTypage.binaireCompatible(a.getNoeud(), verifier_EXP(a.getFils1()), verifier_EXP(a.getFils2()));
-			if(RBC.getOk()) {
-				a.setDecor(new Decor(RBC.getTypeRes()));
-				return(RBC.getTypeRes());
-			}
-			else if(RBC.getConv1()) {
-				Arbre conversion = Arbre.creation1(Noeud.Conversion, a.getFils1(), a.getNumLigne());
-				a.setFils1(conversion);
-				conversion.setDecor(new Decor(Type.Real));
-				a.setDecor(new Decor(RBC.getTypeRes()));
-				return(RBC.getTypeRes());
-			}
-			else if (RBC.getConv2()) {
-				Arbre conversion = Arbre.creation1(Noeud.Conversion, a.getFils2(), a.getNumLigne());
-				a.setFils2(conversion);
-				conversion.setDecor(new Decor(Type.Real));
-				a.setDecor(new Decor(RBC.getTypeRes()));
-				return(RBC.getTypeRes());
-			}
-			else {
-				ErreurContext e = ErreurContext.ErreurAffectationNumeriqueAutre;
-				e.leverErreurContext(null, a.getNumLigne());
-				return(RBC.getTypeRes());
-			}
-			*/
 			
 		case PlusUnaire:
 		case MoinsUnaire:
@@ -758,40 +530,7 @@ public class Verif {
 			/* Décoration du noeud */
 			a.setDecor(new Decor(res_unaire.getTypeRes()));
 			return res_unaire.getTypeRes();
-			
-			/*
-			if(a.getArite()!=1) {
-				ErreurContext e = ErreurContext.ErreurArite;
-				e.leverErreurContext(null, a.getNumLigne());
-			}
-			RUC = ReglesTypage.unaireCompatible(a.getNoeud(),verifier_EXP(a.getFils(1)));
-			if(RUC.getOk()) {
-				a.setDecor(new Decor(RUC.getTypeRes()));
-				return(RUC.getTypeRes());
-			}
-			else {
-				ErreurContext e = ErreurContext.ErreurAffectationNumeriqueAutre;
-				e.leverErreurContext(null, a.getNumLigne());
-				return(RUC.getTypeRes());
-			}
-			*/
 
-			/*
-			if(a.getArite()!=1) {
-				ErreurContext e = ErreurContext.ErreurArite;
-				e.leverErreurContext(null, a.getNumLigne());
-			}
-			RUC = ReglesTypage.unaireCompatible(a.getNoeud(), verifier_EXP(a.getFils(1)));
-			if(RUC.getOk()) {
-				a.setDecor(new Decor(RUC.getTypeRes()));
-				return(RUC.getTypeRes());
-			}
-			else {
-				ErreurContext e = ErreurContext.ErreurAffectationBooleanAutre;
-				e.leverErreurContext(null, a.getNumLigne());
-				return(RUC.getTypeRes());
-			}
-			*/
 			
 		case Index:
 			verifier_INDEX(a, true);
@@ -819,13 +558,6 @@ public class Verif {
 			return Type.String; //on est pas sûrs
 			
 		case Ident:
-			/*if(env.chercher(a.getChaine()) == null ) {
-				ErreurContext e = ErreurContext.ErreurPasDeclare;
-				e.leverErreurContext(null, a.getNumLigne());
-			}
-			Defn defn = env.chercher(a.getChaine().toLowerCase());
-			a.setDecor(new Decor(defn));
-			*/
 			verifier_IDENT(a, null, false);
 			return a.getDecor().getType();
 			
@@ -836,18 +568,15 @@ public class Verif {
 
 	/**************************************************************************
 	 * PAS
+	 * 
+	 * Vérifier le pas.
+	 * Vérifier également le contexte.
 	 **************************************************************************/
 	private void verifier_PAS(Arbre a) throws ErreurVerif {
 		switch(a.getNoeud()) {
 		
 		case Increment:
 		case Decrement:
-			/*
-			if(a.getArite()!=3) {
-				ErreurContext e = ErreurContext.ErreurArite;
-				e.leverErreurContext(null, a.getNumLigne());
-				}
-				*/
 			
 			/* Vérification de la grammaire */
 			verifier_IDENT(a.getFils1(), null, false);
@@ -871,38 +600,6 @@ public class Verif {
 				}
 			}
 			break;
-			
-			/*
-			if(a.getFils1().getDecor().getType()!=Type.Integer || a.getFils2().getDecor().getType()!=Type.Integer 
-					|| a.getFils3().getDecor().getType()!=Type.Integer) {
-				ErreurContext e = ErreurContext.ErreurType;
-				e.leverErreurContext(null, a.getNumLigne());
-			}
-			if(a.getFils2().getEntier()>a.getFils3().getEntier()) {
-				ErreurContext e = ErreurContext.ErreurIndicesInverse;
-				e.leverErreurContext(null, a.getNumLigne());
-			}
-			*/
-			
-			/*
-			if(a.getArite()!=3) {
-				ErreurContext e = ErreurContext.ErreurArite;
-				e.leverErreurContext(null, a.getNumLigne());
-			}
-			verifier_IDENT_util(a.getFils1());
-			verifier_EXP(a.getFils2());
-			verifier_EXP(a.getFils3());
-			if(a.getFils1().getDecor().getType()!=Type.Integer || a.getFils2().getDecor().getType()!=Type.Integer 
-					|| a.getFils3().getDecor().getType()!=Type.Integer) {
-				ErreurContext e = ErreurContext.ErreurType;
-				e.leverErreurContext(null, a.getNumLigne());
-			}
-			if(a.getFils2().getEntier()<a.getFils3().getEntier()) {
-				ErreurContext e = ErreurContext.ErreurIndicesInverse;
-				e.leverErreurContext(null, a.getNumLigne());
-			}
-			break;
-			*/
 			
 		default:
 			throw new ErreurInterneVerif("Arbre incorrect dans verifier_PAS");

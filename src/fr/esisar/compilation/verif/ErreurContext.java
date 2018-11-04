@@ -60,7 +60,7 @@ public enum ErreurContext {
        
        
        case ErreurIdentificateurTypeNonReconnu:
-    	   System.err.println("L'identificateur de type dans la déclaration n'est pa reconnu");
+    	   System.err.println("L'identificateur de type dans la déclaration n'est pas reconnu");
     	   break;
        case ErreurDejaDeclare: 
     	   System.err.println("La variable a déja été déclarée");
@@ -108,7 +108,7 @@ public enum ErreurContext {
     	   System.err.println("Les indices de l'incrémentation ne correspondent pas");
     	   break;
        case ErreurExpressionWrite :
-    	   System.err.println("Les expressions devraient etre de type Real, Interva ou String");
+    	   System.err.println("Les expressions devraient etre de type Real, Interval ou String");
     	   break;
     	   
        default:
