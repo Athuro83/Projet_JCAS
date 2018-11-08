@@ -15,11 +15,12 @@ class Generation {
     */
    static Prog coder(Arbre a) {
       Prog.ajouterGrosComment("Programme généré par JCasc");
-
+      
       // -----------
       // A COMPLETER
       // -----------
-
+      CoderProg codage = new CoderProg();
+      codage.coderProgramme(a);
 
       // Fin du programme
       // L'instruction "HALT"
@@ -30,6 +31,7 @@ class Generation {
       // On retourne le programme assembleur généré
       return Prog.instance(); 
    }
+   
 }
 
 
