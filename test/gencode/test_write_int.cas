@@ -1,0 +1,6 @@
+-- Test de l'instruction write avec un entier
+program
+begin
+   write(10);
+end.
+

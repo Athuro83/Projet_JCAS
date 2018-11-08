@@ -1,13 +1,16 @@
-package fr.esisar.compilation.global.src3;
+package fr.esisar.compilation.gencode;
 
-import fr.esisar.compilation.global.src.*;
-import fr.esisar.compilation.verif.ErreurContext;
+import fr.esisar.compilation.global.src.Arbre;
+import fr.esisar.compilation.global.src.Defn;
+import fr.esisar.compilation.global.src.Type;
+import fr.esisar.compilation.global.src3.ErreurInst;
+import fr.esisar.compilation.global.src3.ErreurOperande;
+import fr.esisar.compilation.global.src3.Inst;
+import fr.esisar.compilation.global.src3.Ligne;
+import fr.esisar.compilation.global.src3.Operande;
+import fr.esisar.compilation.global.src3.Operation;
+import fr.esisar.compilation.global.src3.Prog;
 import fr.esisar.compilation.verif.ErreurInterneVerif;
-import fr.esisar.compilation.verif.ErreurVerif;
-import fr.esisar.compilation.verif.ReglesTypage;
-import fr.esisar.compilation.verif.ResultatAffectCompatible;
-import fr.esisar.compilation.verif.ResultatBinaireCompatible;
-import fr.esisar.compilation.verif.ResultatUnaireCompatible;
 
 public class CoderProg {
 
@@ -205,6 +208,7 @@ public class CoderProg {
 			break;
 			
 		case Ecriture:
+			coder_LISTE_EXP(a.getFils1());
 			break;
 
 		case Ligne:
@@ -243,8 +247,8 @@ public class CoderProg {
 			break;
 			
 		case ListeExp:
-			coder_EXP(a.getFils2());
 			coder_LISTE_EXP(a.getFils1());
+			coder_EXP(a.getFils2());
 			break;
 			
 		default:
@@ -297,12 +301,20 @@ public class CoderProg {
 			return null;
 			
 		case Entier:
+			/* Charger l'entier dans le registre R1 */
+			Prog.ajouter(new Ligne(null, Inst.creation2(Operation.LOAD, Operande.creationOpEntier(a.getEntier()), Operande.R1), ""));
+			Prog.ajouter(new Ligne(null, Inst.creation0(Operation.WINT), "Ecrire entier: " + a.getEntier()));
 			return null;
 			
 		case Reel:
+			/* Charger le réel dans le registre R1 */
+			Prog.ajouter(new Ligne(null, Inst.creation2(Operation.LOAD, Operande.creationOpReel(a.getReel()), Operande.R1), ""));
+			Prog.ajouter(new Ligne(null, Inst.creation0(Operation.WFLOAT), "Ecrire reel: " + a.getReel()));
 			return null;
 			
 		case Chaine:
+			/* Ecrire la chaîne */
+			Prog.ajouter(new Ligne(null, Inst.creation1(Operation.WSTR, Operande.creationOpChaine(a.getChaine())), "Ecrire chaine: " + a.getChaine()));
 			return null;
 			
 		case Ident:

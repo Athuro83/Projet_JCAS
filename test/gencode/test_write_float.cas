@@ -1,0 +1,6 @@
+-- Test de l'instruction write avec un float
+program
+begin
+   write(10.01);
+end.
+
