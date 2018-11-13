@@ -168,7 +168,10 @@ public class Verif {
 			}
 			
 			/* On décore l'identificateur avec sa Defn et son Type */
-			a.setDecor(new Decor(def, def.getType()));
+			Decor dec = new Decor(def, def.getType()) ;
+			// on utilise un registre pour enregistre pour enregistrer la valeur dans un ident 
+			dec.setInfoCode(1);
+			a.setDecor(dec);
 		}
 	}
 	
@@ -320,7 +323,9 @@ public class Verif {
 			}
 			
 			/* Décoration du noeud avec le type */
-			a.setDecor(new Decor(getTypeNoeud(a.getFils1())));			
+			Decor decAff = new Decor(getTypeNoeud(a.getFils1())) ;
+			decAff.setInfoCode(a.getFils1().getDecor().getInfoCode()+a.getFils2().getDecor().getInfoCode());
+			a.setDecor(decAff);			
 			break;
 			
 		case Pour:
@@ -460,7 +465,9 @@ public class Verif {
 		
 		/* Décorer le noeud si nécessaire */
 		if(setDecor) {
-			a.setDecor(new Decor(res_index.getTypeRes()));
+			Decor dec = new Decor(res_index.getTypeRes()) ; 
+			dec.setInfoCode(1);
+			a.setDecor(dec);
 		}
 		
 		/* Faire remonter la def du tableau */
@@ -509,7 +516,10 @@ public class Verif {
 			}
 			
 			/* Décor du noeud */
-			a.setDecor(new Decor(res_binaire.getTypeRes()));
+			Decor decb = new Decor(res_binaire.getTypeRes()) ; 
+			// le nombre de registre est la somme des registres utilises par le fils1 et le fils2 
+			decb.setInfoCode(a.getFils1().getDecor().getInfoCode() + a.getFils2().getDecor().getInfoCode());
+			a.setDecor(decb);
 			return res_binaire.getTypeRes();
 
 			
@@ -528,7 +538,9 @@ public class Verif {
 			}
 			
 			/* Décoration du noeud */
-			a.setDecor(new Decor(res_unaire.getTypeRes()));
+			Decor decu = new Decor(res_unaire.getTypeRes()) ; 
+			decu.setInfoCode(a.getFils1().getDecor().getInfoCode());
+			a.setDecor(decu);
 			return res_unaire.getTypeRes();
 
 			
@@ -541,20 +553,29 @@ public class Verif {
 			verifier_EXP(a.getFils1());
 			
 			/* Décorer le noeud */
-			a.setDecor(new Decor(Type.Real));
+			Decor decConv = new Decor(Type.Real);
+			//On ajoute un registre pour enregistrer la conversion 
+			decConv.setInfoCode(a.getFils1().getDecor().getInfoCode()+1);
+			a.setDecor(decConv);
 			return Type.Real;
 			
 		case Entier:
 			//System.out.println("Entier");
-			a.setDecor(new Decor(Type.Integer));
+			Decor decEnt = new Decor(Type.Integer) ; 
+			decEnt.setInfoCode(0);
+			a.setDecor(decEnt);
 			return Type.Integer;
 			
 		case Reel:
-			a.setDecor(new Decor(Type.Real));
+			Decor decReal = new Decor(Type.Real);
+			decReal.setInfoCode(0);
+			a.setDecor(decReal);
 			return Type.Real;
 			
 		case Chaine:
-			a.setDecor(new Decor(Type.String));
+			Decor decChaine = new Decor(Type.String);
+			decChaine.setInfoCode(0);
+			a.setDecor(decChaine); 
 			return Type.String; //on est pas sûrs
 			
 		case Ident:
