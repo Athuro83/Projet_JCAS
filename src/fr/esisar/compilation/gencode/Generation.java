@@ -24,9 +24,9 @@ class Generation {
 
       // Fin du programme
       // L'instruction "HALT"
-      Inst inst = Inst.creation0(Operation.HALT);
+      //Inst inst = Inst.creation0(Operation.HALT);
       // On ajoute l'instruction à la fin du programme
-      Prog.ajouter(inst);
+      //Prog.ajouter(inst);
 
       // On retourne le programme assembleur généré
       return Prog.instance(); 

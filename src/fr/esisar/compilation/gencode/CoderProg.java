@@ -1,16 +1,10 @@
 package fr.esisar.compilation.gencode;
 
-import fr.esisar.compilation.global.src.Arbre;
-import fr.esisar.compilation.global.src.Defn;
-import fr.esisar.compilation.global.src.Type;
-import fr.esisar.compilation.global.src3.ErreurInst;
-import fr.esisar.compilation.global.src3.ErreurOperande;
-import fr.esisar.compilation.global.src3.Inst;
-import fr.esisar.compilation.global.src3.Ligne;
-import fr.esisar.compilation.global.src3.Operande;
-import fr.esisar.compilation.global.src3.Operation;
-import fr.esisar.compilation.global.src3.Prog;
-import fr.esisar.compilation.verif.ErreurInterneVerif;
+import java.util.HashMap;
+import java.util.Map;
+
+import fr.esisar.compilation.global.src.*;
+import fr.esisar.compilation.global.src3.*;
 
 public class CoderProg {
 
@@ -22,7 +16,13 @@ public class CoderProg {
 	 * @throws ErreurOperande
 	 */
 	public void coderProgramme(Arbre a) throws ErreurInst, ErreurOperande {
+		/* Coder le programme */
+		Prog.ajouterComment("Programme JCAS");
 		coder_PROGRAMME(a);
+		Prog.ajouter(Inst.creation0(Operation.HALT));
+		/* Coder les exceptions */
+		Prog.ajouterComment("Erreurs machine abstraite");
+		//coder_exception_stack_overflow();
 	}
 	
 	
@@ -30,7 +30,9 @@ public class CoderProg {
 	 * PROGRAMME
 	 **************************************************************************/
 	private void coder_PROGRAMME(Arbre a)  {
+		Prog.ajouterComment("Allocation des variables globales");
 		coder_LISTE_DECL(a.getFils1());
+		Prog.ajouterComment("Lecture du programme");
 		coder_LISTE_INST(a.getFils2());
 	}
 
@@ -42,19 +44,22 @@ public class CoderProg {
 	 * le programme.
 	 **************************************************************************/
 	private void coder_LISTE_DECL(Arbre a)  {
-		switch(a.getNoeud()) {
+
+		/* Récupérer la valeur d'infoCode */
+		/*Decor dec = a.getDecor();
+		if(dec == null) {
+			throw new RuntimeException("Pas de décor sur le noeud racine LISTE_DECL");
+		}*/
 		
-		case Vide:
-			break;
-			
-		case ListeDecl:
-			coder_LISTE_DECL(a.getFils1());
-			coder_DECL(a.getFils2());
-			break;
-			
-		default:
-			throw new ErreurInterneVerif("Arbre incorrect dans verifier_LISTE_DECL");
-		}
+		/* Récupérer la taille des variables globales */
+		int mem_size =  2/*dec.getInfoCode()*/;
+		
+		/* Tester si l'espace est suffisant dans la pile */
+		Prog.ajouter(Inst.creation1(Operation.TSTO, Operande.creationOpEntier(mem_size)), "Test de la pile pour " + mem_size + " cases mémoire");
+		Prog.ajouter(Inst.creation1(Operation.BOV, Operande.creationOpEtiq(Etiq.lEtiq("ERR_OV"))));
+		
+		/* Réserver l'espace pour les variables */
+		Prog.ajouter(Inst.creation1(Operation.ADDSP, Operande.creationOpEntier(mem_size)));
 	}
 
 	/**************************************************************************
@@ -212,6 +217,7 @@ public class CoderProg {
 			break;
 
 		case Ligne:
+			Prog.ajouter(Inst.creation0(Operation.WNL), "Saut de ligne");
 			break;
 			
 		default:
@@ -248,7 +254,7 @@ public class CoderProg {
 			
 		case ListeExp:
 			coder_LISTE_EXP(a.getFils1());
-			coder_EXP(a.getFils2());
+			coder_EXP(a.getFils2(), true);
 			break;
 			
 		default:
@@ -267,7 +273,7 @@ public class CoderProg {
 	/**************************************************************************
 	 * EXP
 	 **************************************************************************/
-	private Type coder_EXP(Arbre a)  {
+	private Type coder_EXP(Arbre a, boolean printEXP)  {
 		switch(a.getNoeud()) {
 		
 		/* Tous les opérateurs binaires */
@@ -301,20 +307,28 @@ public class CoderProg {
 			return null;
 			
 		case Entier:
-			/* Charger l'entier dans le registre R1 */
-			Prog.ajouter(new Ligne(null, Inst.creation2(Operation.LOAD, Operande.creationOpEntier(a.getEntier()), Operande.R1), ""));
-			Prog.ajouter(new Ligne(null, Inst.creation0(Operation.WINT), "Ecrire entier: " + a.getEntier()));
+			/* Teste si on doit afficher la valeur */
+			if(printEXP) {
+				/* Charger l'entier dans le registre R1 */
+				Prog.ajouter(Inst.creation2(Operation.LOAD, Operande.creationOpEntier(a.getEntier()), Operande.R1));
+				Prog.ajouter(Inst.creation0(Operation.WINT), "Ecrire entier: " + a.getEntier());
+			}	
 			return null;
 			
 		case Reel:
-			/* Charger le réel dans le registre R1 */
-			Prog.ajouter(new Ligne(null, Inst.creation2(Operation.LOAD, Operande.creationOpReel(a.getReel()), Operande.R1), ""));
-			Prog.ajouter(new Ligne(null, Inst.creation0(Operation.WFLOAT), "Ecrire reel: " + a.getReel()));
+			/* Teste si on doit afficher la valeur */
+			if(printEXP) {
+				/* Charger le réel dans le registre R1 */
+				Prog.ajouter(Inst.creation2(Operation.LOAD, Operande.creationOpReel(a.getReel()), Operande.R1));
+				Prog.ajouter(Inst.creation0(Operation.WFLOAT), "Ecrire reel: " + a.getReel());
+			}
 			return null;
 			
 		case Chaine:
 			/* Ecrire la chaîne */
-			Prog.ajouter(new Ligne(null, Inst.creation1(Operation.WSTR, Operande.creationOpChaine(a.getChaine())), "Ecrire chaine: " + a.getChaine()));
+			if(printEXP) {
+				Prog.ajouter(Inst.creation1(Operation.WSTR, Operande.creationOpChaine(a.getChaine())), "Ecrire chaine: " + a.getChaine());
+			}
 			return null;
 			
 		case Ident:
@@ -339,5 +353,12 @@ public class CoderProg {
 		default:
 			//throw new ErreurInterneVerif("Arbre incorrect dans verifier_PAS");
 		}
+	}
+	
+	// Fonctions d'implémentation des erreurs
+	
+	private void coder_exception_stack_overflow() {
+		
+		Prog.ajouter(Etiq.lEtiq("ERR_OV"));
 	}
 }
