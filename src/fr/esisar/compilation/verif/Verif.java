@@ -84,11 +84,19 @@ public class Verif {
 		switch(a.getNoeud()) {
 		
 		case Vide:
+			Decor dec_vide = new Decor();
+			dec_vide.setInfoCode(0);
+			a.setDecor(dec_vide);
 			break;
 			
 		case ListeDecl:
 			verifier_LISTE_DECL(a.getFils1());
 			verifier_DECL(a.getFils2());
+			Decor dec = new Decor();
+			/*InfoCode contient ici le nombre de cases mémoires nécéssitées pour faire les déclarations*/
+			dec.setInfoCode(a.getFils1().getDecor().getInfoCode()+a.getFils2().getDecor().getInfoCode());
+			a.setDecor(dec);
+			
 			break;
 			
 		default:
@@ -108,6 +116,10 @@ public class Verif {
 		case Decl:
 			Type type_decl = verifier_TYPE(a.getFils2());
 			verifier_LISTE_IDENT(a.getFils1(), type_decl);
+			Decor dec = new Decor();
+			/*InfoCode contient ici le nombre de cases mémoires nécéssitées*/
+			dec.setInfoCode(a.getFils1().getDecor().getInfoCode());
+			a.setDecor(dec);
 			break;
 		default:
 			throw new ErreurInterneVerif("Arbre incorrect dans verifier_DECL");
@@ -123,11 +135,19 @@ public class Verif {
 	private void verifier_LISTE_IDENT(Arbre a, Type type) throws ErreurVerif {
 		switch(a.getNoeud()) {
 		case Vide:
+			Decor dec_vide = new Decor();
+			dec_vide.setInfoCode(0);
+			a.setDecor(dec_vide);
+			
 			break;
 			
 		case ListeIdent:
 			verifier_LISTE_IDENT(a.getFils1(), type);
 			verifier_IDENT(a.getFils2(), type, true);
+			Decor dec = new Decor();
+			/*InfoCode contient ici le nombre de cases mémoires nécéssitées*/
+			dec.setInfoCode(a.getFils1().getDecor().getInfoCode()+a.getFils2().getDecor().getInfoCode());
+			a.setDecor(dec);
 			break;
 			
 		default:
@@ -152,12 +172,15 @@ public class Verif {
 				ErreurContext.ErreurDejaDeclare.leverErreurContext(null, a.getNumLigne());
 			}
 			
-			/* On enrichie l'environnement avec ce nouvel identificateur */
+			/* On enrichit l'environnement avec ce nouvel identificateur */
 			Defn def_ident = Defn.creationVar(t);
 			env.enrichir(a.getChaine(), def_ident);
 			
 			/* On décore le noeud avec ces informations */
-			a.setDecor(new Decor(def_ident));
+			Decor dec = new Decor(def_ident);
+			/*La déclaration va occuper une case mémoire : on utilise InfoCode pour stocker cette information*/
+			dec.setInfoCode(1);
+			a.setDecor(dec);
 		}
 		else {
 			/* On vérifie que l'identificateur est bien déclaré */
