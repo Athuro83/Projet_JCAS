@@ -22,7 +22,7 @@ public class CoderProg {
 		Prog.ajouter(Inst.creation0(Operation.HALT));
 		/* Coder les exceptions */
 		Prog.ajouterComment("Erreurs machine abstraite");
-		coder_ERR_OV();
+		coder_ERR_STACK_OV();
 	}
 	
 	
@@ -56,7 +56,7 @@ public class CoderProg {
 		
 		/* Tester si l'espace est suffisant dans la pile */
 		Prog.ajouter(Inst.creation1(Operation.TSTO, Operande.creationOpEntier(mem_size)), "Test de la pile pour " + mem_size + " cases mémoire");
-		Prog.ajouter(Inst.creation1(Operation.BOV, Operande.creationOpEtiq(Etiq.lEtiq("ERR_OV"))));
+		Prog.ajouter(Inst.creation1(Operation.BOV, Operande.creationOpEtiq(Etiq.lEtiq("ERR_STACK_OV"))));
 		
 		/* Réserver l'espace pour les variables */
 		Prog.ajouter(Inst.creation1(Operation.ADDSP, Operande.creationOpEntier(mem_size)));
@@ -357,10 +357,17 @@ public class CoderProg {
 	
 	// Fonctions d'implémentation des erreurs
 	
-	private void coder_ERR_OV() {
+	private void coder_ERR_STACK_OV() {
 		
-		Prog.ajouter(Etiq.lEtiq("ERR_OV"), "Erreur : Dépassement de la pile");
+		Prog.ajouter(Etiq.lEtiq("ERR_STACK_OV"), "Erreur : Dépassement de la capacité de la pile");
 		Prog.ajouter(Inst.creation1(Operation.WSTR, Operande.creationOpChaine("Limite de pile depassee")));
+		Prog.ajouter(Inst.creation0(Operation.HALT));
+	}
+	
+	private void coder_ERR_ADD_OV() {
+		
+		Prog.ajouter(Etiq.lEtiq("ERR_ADD_OV"), "Erreur : Dépassement après opération arithmétique");
+		Prog.ajouter(Inst.creation1(Operation.WSTR, Operande.creationOpChaine("Overflow apres operation arithmetique")));
 		Prog.ajouter(Inst.creation0(Operation.HALT));
 	}
 }
