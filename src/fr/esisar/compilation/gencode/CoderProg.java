@@ -22,7 +22,7 @@ public class CoderProg {
 		Prog.ajouter(Inst.creation0(Operation.HALT));
 		/* Coder les exceptions */
 		Prog.ajouterComment("Erreurs machine abstraite");
-		//coder_exception_stack_overflow();
+		coder_ERR_OV();
 	}
 	
 	
@@ -357,8 +357,10 @@ public class CoderProg {
 	
 	// Fonctions d'implémentation des erreurs
 	
-	private void coder_exception_stack_overflow() {
+	private void coder_ERR_OV() {
 		
-		Prog.ajouter(Etiq.lEtiq("ERR_OV"));
+		Prog.ajouter(Etiq.lEtiq("ERR_OV"), "Erreur : Dépassement de la pile");
+		Prog.ajouter(Inst.creation1(Operation.WSTR, Operande.creationOpChaine("Limite de pile depassee")));
+		Prog.ajouter(Inst.creation0(Operation.HALT));
 	}
 }
