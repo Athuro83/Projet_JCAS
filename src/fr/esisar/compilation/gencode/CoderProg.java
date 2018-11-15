@@ -23,6 +23,7 @@ public class CoderProg {
 		/* Coder les exceptions */
 		Prog.ajouterComment("Erreurs machine abstraite");
 		coder_ERR_STACK_OV();
+		coder_ERR_ADD_OV();
 	}
 	
 	
@@ -213,7 +214,7 @@ public class CoderProg {
 			break;
 			
 		case Ecriture:
-			coder_LISTE_EXP(a.getFils1());
+			afficher_LISTE_EXP(a.getFils1());
 			break;
 
 		case Ligne:
@@ -246,15 +247,15 @@ public class CoderProg {
 	/**************************************************************************
 	 * LISTE_EXP
 	 **************************************************************************/
-	private void coder_LISTE_EXP(Arbre a)  {
+	private void afficher_LISTE_EXP(Arbre a)  {
 		switch(a.getNoeud()) {
 		
 		case Vide:
 			break;
 			
 		case ListeExp:
-			coder_LISTE_EXP(a.getFils1());
-			coder_EXP(a.getFils2(), true);
+			afficher_LISTE_EXP(a.getFils1());
+			afficher_EXP(a.getFils2());
 			break;
 			
 		default:
@@ -273,7 +274,41 @@ public class CoderProg {
 	/**************************************************************************
 	 * EXP
 	 **************************************************************************/
-	private Type coder_EXP(Arbre a, boolean printEXP)  {
+	
+	/**
+	 * Afficher_EXP
+	 * @param a
+	 * 
+	 * Affiche à l'écran l'expression
+	 */
+	private void afficher_EXP(Arbre a) {
+		switch(a.getNoeud()) {
+		
+			case Entier:
+				afficher_INT(a.getEntier());
+				break;
+				
+			case Reel:
+				afficher_FLOAT(a.getReel());
+				break;
+				
+			case Chaine:
+				Prog.ajouter(Inst.creation1(Operation.WSTR, Operande.creationOpChaine(a.getChaine())), "Ecrire chaine: " + a.getChaine());
+				break;
+				
+			case Ident:
+				/* Vérifier la nature de l'identificateur */
+				
+				/* Afficher la valeur de l'identificateur */
+				break;
+				
+			default:
+				/* Expressions qui demandent un calcul avant affichage */
+
+		}
+	}
+	
+	private Type coder_EXP(Arbre a, Registre r)  {
 		switch(a.getNoeud()) {
 		
 		/* Tous les opérateurs binaires */
@@ -307,28 +342,12 @@ public class CoderProg {
 			return null;
 			
 		case Entier:
-			/* Teste si on doit afficher la valeur */
-			if(printEXP) {
-				/* Charger l'entier dans le registre R1 */
-				Prog.ajouter(Inst.creation2(Operation.LOAD, Operande.creationOpEntier(a.getEntier()), Operande.R1));
-				Prog.ajouter(Inst.creation0(Operation.WINT), "Ecrire entier: " + a.getEntier());
-			}	
 			return null;
 			
 		case Reel:
-			/* Teste si on doit afficher la valeur */
-			if(printEXP) {
-				/* Charger le réel dans le registre R1 */
-				Prog.ajouter(Inst.creation2(Operation.LOAD, Operande.creationOpReel(a.getReel()), Operande.R1));
-				Prog.ajouter(Inst.creation0(Operation.WFLOAT), "Ecrire reel: " + a.getReel());
-			}
 			return null;
 			
 		case Chaine:
-			/* Ecrire la chaîne */
-			if(printEXP) {
-				Prog.ajouter(Inst.creation1(Operation.WSTR, Operande.creationOpChaine(a.getChaine())), "Ecrire chaine: " + a.getChaine());
-			}
 			return null;
 			
 		case Ident:
@@ -353,6 +372,20 @@ public class CoderProg {
 		default:
 			//throw new ErreurInterneVerif("Arbre incorrect dans verifier_PAS");
 		}
+	}
+	
+	// Fonctions d'affichage
+	
+	private void afficher_INT(int i) {
+		/* Charger l'entier dans le registre R1 */
+		Prog.ajouter(Inst.creation2(Operation.LOAD, Operande.creationOpEntier(i), Operande.R1));
+		Prog.ajouter(Inst.creation0(Operation.WINT), "Ecrire entier: " + i);
+	}
+	
+	private void afficher_FLOAT(float f) {
+		/* Charger le réel dans le registre R1 */
+		Prog.ajouter(Inst.creation2(Operation.LOAD, Operande.creationOpReel(f), Operande.R1));
+		Prog.ajouter(Inst.creation0(Operation.WFLOAT), "Ecrire reel: " + f);
 	}
 	
 	// Fonctions d'implémentation des erreurs
