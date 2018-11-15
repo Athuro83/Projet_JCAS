@@ -429,6 +429,7 @@ public class Verif {
 			 * 		Seulement des types String, Real et Interval */
 			verifier_EXP(a.getFils2());
 			Type type_exp = getTypeNoeud(a.getFils2());
+			
 			if(type_exp != Type.String && type_exp != Type.Real && type_exp != Type.Integer) {
 				/* ERREUR CONTEXTE : On essaye d'écrire autre chose qu'une chaîne, un entier ou un réel */
 				ErreurContext.ErreurExpressionWrite.leverErreurContext(null, a.getNumLigne());
