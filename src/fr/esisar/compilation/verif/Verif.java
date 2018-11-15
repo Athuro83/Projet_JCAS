@@ -347,7 +347,8 @@ public class Verif {
 			
 			/* Décoration du noeud avec le type */
 			Decor decAff = new Decor(getTypeNoeud(a.getFils1())) ;
-			decAff.setInfoCode(a.getFils1().getDecor().getInfoCode()+a.getFils2().getDecor().getInfoCode());
+			decAff.setInfoCode(a.getFils2().getDecor().getInfoCode());
+			//System.out.println("Infocode ajouté : " + a.getFils1().getDecor().getInfoCode() + " et " + a.getFils2().getDecor().getInfoCode());
 			a.setDecor(decAff);			
 			break;
 			
@@ -451,6 +452,7 @@ public class Verif {
 			 * 		Seulement des types String, Real et Interval */
 			verifier_EXP(a.getFils2());
 			Type type_exp = getTypeNoeud(a.getFils2());
+			
 			if(type_exp != Type.String && type_exp != Type.Real && type_exp != Type.Integer) {
 				/* ERREUR CONTEXTE : On essaye d'écrire autre chose qu'une chaîne, un entier ou un réel */
 				ErreurContext.ErreurExpressionWrite.leverErreurContext(null, a.getNumLigne());
@@ -489,7 +491,7 @@ public class Verif {
 		/* Décorer le noeud si nécessaire */
 		if(setDecor) {
 			Decor dec = new Decor(res_index.getTypeRes()) ; 
-			dec.setInfoCode(1);
+			dec.setInfoCode(a.getFils1().getDecor().getInfoCode()+a.getFils2().getDecor().getInfoCode()); // finalement on le calcule déja dans ident
 			a.setDecor(dec);
 		}
 		
@@ -702,7 +704,9 @@ public class Verif {
 		/* Créer le noeud */
 		Arbre conv = Arbre.creation1(Noeud.Conversion, a.getFils(numFils), a.getNumLigne());
 		/* Le décorer */
-		conv.setDecor(new Decor(Type.Real));
+		Decor decConv = new Decor(Type.Real);
+		decConv.setInfoCode( a.getFils(numFils).getDecor().getInfoCode());
+		conv.setDecor(decConv);
 		/* Le positionner */
 		a.setFils(numFils, conv);
 	}
