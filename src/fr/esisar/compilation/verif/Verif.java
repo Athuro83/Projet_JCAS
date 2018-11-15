@@ -164,12 +164,12 @@ public class Verif {
 			Defn def;
 			if((def = env.chercher(a.getChaine())) == null) {
 				/* ERREUR CONTEXTE : Identificateur non déclaré ! */
-				ErreurContext.ErreurNonRepertoriee.leverErreurContext(null, a.getNumLigne());
+				ErreurContext.ErreurPasDeclare.leverErreurContext(null, a.getNumLigne());
 			}
 			
 			/* On décore l'identificateur avec sa Defn et son Type */
 			Decor dec = new Decor(def, def.getType()) ;
-			// on utilise un registre pour enregistre pour enregistrer la valeur dans un ident 
+			// on utilise un registre pour enregistrer la valeur dans un ident 
 			dec.setInfoCode(1);
 			a.setDecor(dec);
 		}
@@ -188,7 +188,7 @@ public class Verif {
 			Defn def;
 			if((def = env.chercher(a.getChaine())) == null) {
 				/* ERREUR CONTEXTE : Identificateur non déclaré */
-				ErreurContext.ErreurNonRepertoriee.leverErreurContext(null, a.getNumLigne());
+				ErreurContext.ErreurPasDeclare.leverErreurContext(null, a.getNumLigne());
 			}
 			else if(def.getNature() != NatureDefn.Type) {
 				/* ERREUR : Pas un identificateur de type */
@@ -240,7 +240,7 @@ public class Verif {
 			Defn def;
 			if((def = env.chercher(a.getChaine())) == null) {
 				/* ERREUR : Identificateur non déclaré */
-				ErreurContext.ErreurNonRepertoriee.leverErreurContext(null, a.getNumLigne());
+				ErreurContext.ErreurPasDeclare.leverErreurContext(null, a.getNumLigne());
 			}
 			else if(def.getNature() != NatureDefn.ConstInteger) {
 				/* ERREUR : Pas un identificateur de constante entière */
