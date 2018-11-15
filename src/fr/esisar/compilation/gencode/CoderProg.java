@@ -15,6 +15,33 @@ public class CoderProg {
 	 * @throws ErreurInst
 	 * @throws ErreurOperande
 	 */
+	
+	//  HashMap representant l'etat des registres : true -> Libre / false -> Utilise
+	HashMap<Registre, Boolean> etatRegistre = new HashMap<Registre, Boolean>();
+	// Tableau contenant tous les registres
+	Registre tabRegistre[] = {Registre.R0, 
+							  Registre.R1, 
+							  Registre.R2, 
+							  Registre.R3, 
+							  Registre.R4, 
+							  Registre.R5, 
+							  Registre.R6, 
+							  Registre.R7, 
+							  Registre.R8, 
+							  Registre.R9, 
+							  Registre.R10, 
+							  Registre.R11, 
+							  Registre.R12, 
+							  Registre.R13, 
+							  Registre.R14, 
+							  Registre.R15} ;
+	
+	// HashMap permettant d'associer un offset a un ID
+	HashMap<String, Integer> offsetID = new HashMap<String, Integer>();
+	// Integer permettant d'avoir un repere dans l'espace de la pile alloue aux variables
+	// Il pointe sur la premiere case vide
+	Integer repereOffset = 0;
+	
 	public void coderProgramme(Arbre a) throws ErreurInst, ErreurOperande {
 		/* Coder le programme */
 		Prog.ajouterComment("Programme JCAS");
@@ -55,8 +82,7 @@ public class CoderProg {
 		int mem_size =  2/*dec.getInfoCode()*/;
 		
 		/* Tester si l'espace est suffisant dans la pile */
-		Prog.ajouter(Inst.creation1(Operation.TSTO, Operande.creationOpEntier(mem_size)), "Test de la pile pour " + mem_size + " cases mémoire");
-		Prog.ajouter(Inst.creation1(Operation.BOV, Operande.creationOpEtiq(Etiq.lEtiq("ERR_OV"))));
+		testerPile(mem_size);
 		
 		/* Réserver l'espace pour les variables */
 		Prog.ajouter(Inst.creation1(Operation.ADDSP, Operande.creationOpEntier(mem_size)));
@@ -197,7 +223,14 @@ public class CoderProg {
 		case Nop:
 			break;
 			
-		case Affect:			
+		case Affect:		
+			Decor decor = a.getDecor();
+			Type type = decor.getType();
+			
+			if(type.toString() == "Integer")
+			{
+				
+			}
 			break;
 			
 		case Pour:
@@ -228,17 +261,17 @@ public class CoderProg {
 	/**************************************************************************
 	 * PLACE
 	 **************************************************************************/
-	private Defn verifier_PLACE(Arbre a, boolean setDecor)  {
+	private void coder_PLACE(Arbre a, boolean setDecor)  {
 		switch(a.getNoeud()) {
 		
 		case Ident:
-			return null;
+			break;
 			
 		case Index:
-			return verifier_INDEX(a, setDecor);
+			break;
 			
 		default:
-			return null;
+			break;
 			//throw new ErreurInterneVerif("Arbre incorrect dans verifier_PLACE");
 		}
 	}
@@ -265,7 +298,7 @@ public class CoderProg {
 	/**************************************************************************
 	 * INDEX
 	 **************************************************************************/
-	private Defn verifier_INDEX(Arbre a, boolean setDecor) {
+	private Defn coder_INDEX(Arbre a, boolean setDecor) {
 
 		return null;
 	}
@@ -313,6 +346,9 @@ public class CoderProg {
 				Prog.ajouter(Inst.creation2(Operation.LOAD, Operande.creationOpEntier(a.getEntier()), Operande.R1));
 				Prog.ajouter(Inst.creation0(Operation.WINT), "Ecrire entier: " + a.getEntier());
 			}	
+			else 
+			{
+			}
 			return null;
 			
 		case Reel:
@@ -343,7 +379,7 @@ public class CoderProg {
 	/**************************************************************************
 	 * PAS
 	 **************************************************************************/
-	private void verifier_PAS(Arbre a)  {
+	private void coder_PAS(Arbre a)  {
 		switch(a.getNoeud()) {
 		
 		case Increment:
@@ -353,6 +389,74 @@ public class CoderProg {
 		default:
 			//throw new ErreurInterneVerif("Arbre incorrect dans verifier_PAS");
 		}
+	}
+	// Fonctions utilitaires 
+	
+	// Cette fonction initialise l'etat de tous les registres
+	private void initialiserRegistre() {
+		for(Registre R : tabRegistre)
+		{
+			etatRegistre.put(R, true);
+		}
+	}
+	
+	// Cette foncton permet d'allouer le premier registre libre
+	// S'il n'y en a pas, elle renvoie null;
+	private Registre allouerRegistre() {
+		for(int i=0 ; i < 16 ; i++)
+		{
+			if((boolean) etatRegistre.get(tabRegistre[i]))
+			{
+				etatRegistre.put(tabRegistre[i], false);
+				return tabRegistre[i];
+			}
+		}
+		return null;
+	}
+	
+	// Cette fonction permet de liberer le registre placer en argument
+	private void libererRegistre(Registre R) {
+		etatRegistre.replace(R, true);
+	}
+	
+	// Cette fonction permet de tester s'il reste au moins un registre libre
+	// true -> un registre est libre / false -> tous les registres sont occupes
+	private boolean resteRegistre() {
+		for(Registre R : tabRegistre) {
+			if(etatRegistre.get(R)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	// Cette fonction permet de stocker l'offset correspondant à l'ID
+	private void allouerOffsetID(String id, int sizeID) {
+		offsetID.put(id, repereOffset);
+		repereOffset += sizeID;
+	}
+	
+	// Cette fonction permet d'avoir l'offset associe a l'id en argument
+	private int getOffset(String id) {
+		return offsetID.get(id);
+	}
+	
+	// Cette fonction permet d'allouer une place en pile pour une varibale temporaire
+	private void allouerTemp(Registre R) {
+		testerPile(1);
+		Prog.ajouter(Inst.creation1(Operation.PUSH, Operande.opDirect(R)), "Allocation d'une variable temporaire");
+	}
+	
+	// Cette fonction permet de liberer la place dans la pile allouee a une variable temporaire
+	private void libererTemp(Registre R) {
+		Prog.ajouter(Inst.creation1(Operation.POP, Operande.opDirect(R)), "Liberation de la pile et suppression de la variable temporaire");
+	}
+	
+	// Cette fonction permet de tester si la place dans la pile est suffisante
+	private void testerPile(int mem_size) {
+		/* Tester si l'espace est suffisant dans la pile */
+		Prog.ajouter(Inst.creation1(Operation.TSTO, Operande.creationOpEntier(mem_size)), "Test de la pile pour " + mem_size + " case(s) mémoire");
+		Prog.ajouter(Inst.creation1(Operation.BOV, Operande.creationOpEtiq(Etiq.lEtiq("ERR_OV"))));
 	}
 	
 	// Fonctions d'implémentation des erreurs
