@@ -303,7 +303,7 @@ COMMENT        = "--"([\040-\176]|\t)*
 ">" 		      { return symbol(sym.SUP); }
 "="		      { return symbol(sym.EGAL); }
 "+"		      { return symbol(sym.PLUS); }
-"-"		      { return symbol(sym.INF); }
+"-"		      { return symbol(sym.MOINS); }
 "*"		      { return symbol(sym.MULT); }
 "/"		      { return symbol(sym.DIV); }
 "."		      { return symbol(sym.POINT); }
