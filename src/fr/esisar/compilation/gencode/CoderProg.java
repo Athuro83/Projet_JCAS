@@ -198,7 +198,8 @@ public class CoderProg {
 		case Nop:
 			break;
 			
-		case Affect:			
+		case Affect:
+			coder_EXP(a.getFils2(), Registre.R1);
 			break;
 			
 		case Pour:
@@ -304,11 +305,92 @@ public class CoderProg {
 				
 			default:
 				/* Expressions qui demandent un calcul avant affichage */
-
+				Prog.ajouter("Calcul de l'expression avant affichage");
+				/* Réserver le registre R1 */
+				//TODO
+				
+				/* Calculer l'expression dans R1 */
+				coder_EXP(a, Registre.R1);
+				
+				/* Afficher correctement l'expression */
+				Decor dec = a.getDecor();
+				if(dec.getType() == Type.Integer) {
+					Prog.ajouter(Inst.creation0(Operation.WINT));
+				}
+				else {
+					Prog.ajouter(Inst.creation0(Operation.WFLOAT));
+				}
 		}
 	}
 	
 	private Type coder_EXP(Arbre a, Registre r)  {
+		/* On vérifie si l'on est sur une feuille de l'arbre */
+		if(isLeaf(a)) {
+			/* Charger la valeur dans le registre */
+			Prog.ajouter("Cas d'une feuille");
+			Prog.ajouter(Inst.creation2(Operation.LOAD, generateOperande(a), Operande.opDirect(r)));
+		}
+		else {
+			
+			if(a.getArite() == 1) {
+				/* On évalue l'expression sous-jacente puis on applique le noeud */
+				Prog.ajouter("Cas d'un noeud d'arité 1");
+				coder_EXP(a.getFils1(), r);
+				
+				switch(a.getNoeud()) {
+				
+					case PlusUnaire:
+						/* Ne rien faire */
+						break;
+						
+					case MoinsUnaire:
+						Prog.ajouter(Inst.creation2(Operation.OPP, Operande.opDirect(r), Operande.opDirect(r)), "Moins unaire");
+						break;
+						
+					case Non:
+						/* Pas encore bien sûr */
+						break;
+						
+					case Conversion:
+						Prog.ajouter(Inst.creation2(Operation.FLOAT, Operande.opDirect(r), Operande.opDirect(r)), "Convertion entier -> flottant");
+				}
+			}
+			else {
+				/* Vérifier si l'expression de droite est une feuille */
+				Prog.ajouter("Cas d'un noeud d'arité 2");
+				
+				if(isLeaf(a.getFils2())) {
+					/* Calculer l'expression de droite */
+					coder_EXP(a.getFils1(), r);
+					
+					/* Ajouter la feuille de gauche */
+					Operande oper_gauche = generateOperande(a.getFils2());
+					
+					switch(a.getNoeud()) {
+					
+						case Plus:
+							Prog.ajouter(Inst.creation2(Operation.ADD, oper_gauche, Operande.opDirect(r)), "Addition");
+							break;
+							
+						case Moins:
+							Prog.ajouter(Inst.creation2(Operation.SUB, oper_gauche, Operande.opDirect(r)), "Soustraction");
+							break;
+							
+						case Mult:
+							Prog.ajouter(Inst.creation2(Operation.MUL, oper_gauche, Operande.opDirect(r)), "Multiplication");
+							break;
+							
+						case Quotient:
+							Prog.ajouter(Inst.creation2(Operation.DIV, oper_gauche, Operande.opDirect(r)), "Division");
+							break;
+					}
+					
+					/* Vérification d'un éventuel débordement */
+					coder_TEST_ADD_OV();
+				}
+			}
+		}
+		
 		switch(a.getNoeud()) {
 		
 		/* Tous les opérateurs binaires */
@@ -386,6 +468,40 @@ public class CoderProg {
 		/* Charger le réel dans le registre R1 */
 		Prog.ajouter(Inst.creation2(Operation.LOAD, Operande.creationOpReel(f), Operande.R1));
 		Prog.ajouter(Inst.creation0(Operation.WFLOAT), "Ecrire reel: " + f);
+	}
+	
+	// Fonctions utilitaires
+	
+	private Operande generateOperande(Arbre a) {
+		switch (a.getNoeud()) {
+		
+			case Entier:
+				return Operande.creationOpEntier(a.getEntier());
+				
+			case Reel:
+				return Operande.creationOpReel(a.getReel());
+
+			case Ident:
+				/* Chercher où est stocké la valeur de l'identificateur */
+				int offset = 1 /*getOffset(a.getChaine())*/;
+				
+				/* Retourner l'opérande correspondant */
+				return Operande.creationOpIndirect(offset, Registre.GB);
+				
+			default:
+				return null;
+		}
+	}
+	
+	private boolean isLeaf(Arbre a) {
+		return a.getArite() == 0;
+	}
+	
+	// Fonction de détection des erreurs
+	
+	private void coder_TEST_ADD_OV() {
+		
+		Prog.ajouter(Inst.creation1(Operation.BOV, Operande.creationOpEtiq(Etiq.lEtiq("ERR_ADD_OV"))), "Test de débordement arithmétique");
 	}
 	
 	// Fonctions d'implémentation des erreurs
