@@ -179,15 +179,7 @@ public class Verif {
 			/* On décore le noeud avec ces informations */
 			Decor dec = new Decor(def_ident);
 			/*La déclaration va occuper des cases mémoire : on utilise InfoCode pour stocker cette information*/
-			if(t.getNature().equals(NatureType.Interval) 
-					 || t.getNature().equals(NatureType.Boolean)
-					 || t.getNature().equals(NatureType.Real)
-					 || t.getNature().equals(NatureType.String)) {
-				dec.setInfoCode(1);
-			}
-			else {
-				
-			}
+			dec.setInfoCode(trouveTaille(t));
 			a.setDecor(dec);
 		}
 		else {
@@ -717,5 +709,21 @@ public class Verif {
 		conv.setDecor(decConv);
 		/* Le positionner */
 		a.setFils(numFils, conv);
+	}
+	
+	/**************************************************************************
+	 * trouveTaille
+	 * 
+	 * Renvoie le nombre de cases mémoires occupées par l'identificateur en entrée
+	 **************************************************************************/
+	private int trouveTaille(Type t) {
+		if(t.getNature().equals(NatureType.Array)) {
+			int debut = t.getIndice().getBorneInf();
+			int fin = t.getIndice().getBorneSup();
+			return trouveTaille(t.getElement() ) * (fin - debut + 1);
+		}
+		else {
+			return 1;
+		}
 	}
 }
