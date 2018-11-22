@@ -496,7 +496,6 @@ public class Verif {
 			ResultatBinaireCompatible res_binaire = ReglesTypage.binaireCompatible(a.getNoeud(), getTypeNoeud(a.getFils1()), getTypeNoeud(a.getFils2()));
 			if(!res_binaire.getOk()) {
 				/* ERREUR: Opération binaire illégale ! */
-				System.out.println("Erreur flag 1 !\n Type gauche :" + getTypeNoeud(a.getFils1()) + "\n Type droite :" + getTypeNoeud(a.getFils2()) + "Noeud : " + a.getNoeud());
 				ErreurContext.ErreurType.leverErreurContext(null, a.getNumLigne());
 			}
 			

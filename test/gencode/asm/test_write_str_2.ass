@@ -1,0 +1,20 @@
+; ----------------------------------------------------------------------
+; -----------                      Programme généré par JCasc-----------
+; ----------------------------------------------------------------------
+; ----------------------------Programme JCAS----------------------------
+; ------------------Allocation des variables globales-------------------
+   TSTO #2 ; Test de la pile pour 2 cases mémoire
+   BOV err_stack_ov 
+   ADDSP #2 
+; -------------------------Lecture du programme-------------------------
+   WSTR "1" ; Ecrire chaine: 1
+   WSTR "2" ; Ecrire chaine: 2
+   WSTR "3" ; Ecrire chaine: 3
+   HALT 
+; ----------------------Erreurs machine abstraite-----------------------
+err_stack_ov: ; Erreur : Dépassement de la capacité de la pile
+   WSTR "Limite de pile depassee" 
+   HALT 
+err_add_ov: ; Erreur : Dépassement après opération arithmétique
+   WSTR "Overflow apres operation arithmetique" 
+   HALT 

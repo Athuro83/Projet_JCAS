@@ -1,0 +1,7 @@
+-- Test de l'affectation
+program
+    i : integer;
+begin
+    i := 1;
+    i := i + 1;
+end.

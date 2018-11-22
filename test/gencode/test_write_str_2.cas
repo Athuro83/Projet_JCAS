@@ -1,0 +1,7 @@
+-- Test de l'instruction write avec une suite
+-- de chaines de caracteres
+program
+begin
+   write("1", "2", "3");
+end.
+

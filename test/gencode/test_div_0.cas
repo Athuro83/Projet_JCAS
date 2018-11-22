@@ -1,0 +1,5 @@
+-- Test de l'affichage d'une erreur arithmetique
+program
+begin
+    write("test: ", 1/0);
+end.
