@@ -84,11 +84,19 @@ public class Verif {
 		switch(a.getNoeud()) {
 		
 		case Vide:
+			Decor dec_vide = new Decor();
+			dec_vide.setInfoCode(0);
+			a.setDecor(dec_vide);
 			break;
 			
 		case ListeDecl:
 			verifier_LISTE_DECL(a.getFils1());
 			verifier_DECL(a.getFils2());
+			Decor dec = new Decor();
+			/*InfoCode contient ici le nombre de cases mémoires nécéssitées pour faire les déclarations*/
+			dec.setInfoCode(a.getFils1().getDecor().getInfoCode()+a.getFils2().getDecor().getInfoCode());
+			a.setDecor(dec);
+			
 			break;
 			
 		default:
@@ -108,6 +116,10 @@ public class Verif {
 		case Decl:
 			Type type_decl = verifier_TYPE(a.getFils2());
 			verifier_LISTE_IDENT(a.getFils1(), type_decl);
+			Decor dec = new Decor();
+			/*InfoCode contient ici le nombre de cases mémoires nécéssitées*/
+			dec.setInfoCode(a.getFils1().getDecor().getInfoCode());
+			a.setDecor(dec);
 			break;
 		default:
 			throw new ErreurInterneVerif("Arbre incorrect dans verifier_DECL");
@@ -123,11 +135,19 @@ public class Verif {
 	private void verifier_LISTE_IDENT(Arbre a, Type type) throws ErreurVerif {
 		switch(a.getNoeud()) {
 		case Vide:
+			Decor dec_vide = new Decor();
+			dec_vide.setInfoCode(0);
+			a.setDecor(dec_vide);
+			
 			break;
 			
 		case ListeIdent:
 			verifier_LISTE_IDENT(a.getFils1(), type);
 			verifier_IDENT(a.getFils2(), type, true);
+			Decor dec = new Decor();
+			/*InfoCode contient ici le nombre de cases mémoires nécéssitées*/
+			dec.setInfoCode(a.getFils1().getDecor().getInfoCode()+a.getFils2().getDecor().getInfoCode());
+			a.setDecor(dec);
 			break;
 			
 		default:
@@ -152,23 +172,29 @@ public class Verif {
 				ErreurContext.ErreurDejaDeclare.leverErreurContext(null, a.getNumLigne());
 			}
 			
-			/* On enrichie l'environnement avec ce nouvel identificateur */
+			/* On enrichit l'environnement avec ce nouvel identificateur */
 			Defn def_ident = Defn.creationVar(t);
 			env.enrichir(a.getChaine(), def_ident);
 			
 			/* On décore le noeud avec ces informations */
-			a.setDecor(new Decor(def_ident));
+			Decor dec = new Decor(def_ident);
+			/*La déclaration va occuper des cases mémoire : on utilise InfoCode pour stocker cette information*/
+			dec.setInfoCode(trouveTaille(t));
+			a.setDecor(dec);
 		}
 		else {
 			/* On vérifie que l'identificateur est bien déclaré */
 			Defn def;
 			if((def = env.chercher(a.getChaine())) == null) {
 				/* ERREUR CONTEXTE : Identificateur non déclaré ! */
-				ErreurContext.ErreurNonRepertoriee.leverErreurContext(null, a.getNumLigne());
+				ErreurContext.ErreurPasDeclare.leverErreurContext(null, a.getNumLigne());
 			}
 			
 			/* On décore l'identificateur avec sa Defn et son Type */
-			a.setDecor(new Decor(def, def.getType()));
+			Decor dec = new Decor(def, def.getType()) ;
+			// on utilise un registre pour enregistrer la valeur dans un ident 
+			dec.setInfoCode(1);
+			a.setDecor(dec);
 		}
 	}
 	
@@ -185,7 +211,7 @@ public class Verif {
 			Defn def;
 			if((def = env.chercher(a.getChaine())) == null) {
 				/* ERREUR CONTEXTE : Identificateur non déclaré */
-				ErreurContext.ErreurNonRepertoriee.leverErreurContext(null, a.getNumLigne());
+				ErreurContext.ErreurPasDeclare.leverErreurContext(null, a.getNumLigne());
 			}
 			else if(def.getNature() != NatureDefn.Type) {
 				/* ERREUR : Pas un identificateur de type */
@@ -237,7 +263,7 @@ public class Verif {
 			Defn def;
 			if((def = env.chercher(a.getChaine())) == null) {
 				/* ERREUR : Identificateur non déclaré */
-				ErreurContext.ErreurNonRepertoriee.leverErreurContext(null, a.getNumLigne());
+				ErreurContext.ErreurPasDeclare.leverErreurContext(null, a.getNumLigne());
 			}
 			else if(def.getNature() != NatureDefn.ConstInteger) {
 				/* ERREUR : Pas un identificateur de constante entière */
@@ -320,7 +346,10 @@ public class Verif {
 			}
 			
 			/* Décoration du noeud avec le type */
-			a.setDecor(new Decor(getTypeNoeud(a.getFils1())));			
+			Decor decAff = new Decor(getTypeNoeud(a.getFils1())) ;
+			decAff.setInfoCode(a.getFils2().getDecor().getInfoCode());
+			//System.out.println("Infocode ajouté : " + a.getFils1().getDecor().getInfoCode() + " et " + a.getFils2().getDecor().getInfoCode());
+			a.setDecor(decAff);			
 			break;
 			
 		case Pour:
@@ -423,6 +452,7 @@ public class Verif {
 			 * 		Seulement des types String, Real et Interval */
 			verifier_EXP(a.getFils2());
 			Type type_exp = getTypeNoeud(a.getFils2());
+			
 			if(type_exp != Type.String && type_exp != Type.Real && type_exp != Type.Integer) {
 				/* ERREUR CONTEXTE : On essaye d'écrire autre chose qu'une chaîne, un entier ou un réel */
 				ErreurContext.ErreurExpressionWrite.leverErreurContext(null, a.getNumLigne());
@@ -460,7 +490,9 @@ public class Verif {
 		
 		/* Décorer le noeud si nécessaire */
 		if(setDecor) {
-			a.setDecor(new Decor(res_index.getTypeRes()));
+			Decor dec = new Decor(res_index.getTypeRes()) ; 
+			dec.setInfoCode(a.getFils1().getDecor().getInfoCode()+a.getFils2().getDecor().getInfoCode()); // finalement on le calcule déja dans ident
+			a.setDecor(dec);
 		}
 		
 		/* Faire remonter la def du tableau */
@@ -508,7 +540,10 @@ public class Verif {
 			}
 			
 			/* Décor du noeud */
-			a.setDecor(new Decor(res_binaire.getTypeRes()));
+			Decor decb = new Decor(res_binaire.getTypeRes()) ; 
+			// le nombre de registre est la somme des registres utilises par le fils1 et le fils2 
+			decb.setInfoCode(a.getFils1().getDecor().getInfoCode() + a.getFils2().getDecor().getInfoCode());
+			a.setDecor(decb);
 			return res_binaire.getTypeRes();
 
 			
@@ -527,7 +562,9 @@ public class Verif {
 			}
 			
 			/* Décoration du noeud */
-			a.setDecor(new Decor(res_unaire.getTypeRes()));
+			Decor decu = new Decor(res_unaire.getTypeRes()) ; 
+			decu.setInfoCode(a.getFils1().getDecor().getInfoCode());
+			a.setDecor(decu);
 			return res_unaire.getTypeRes();
 
 			
@@ -540,20 +577,29 @@ public class Verif {
 			verifier_EXP(a.getFils1());
 			
 			/* Décorer le noeud */
-			a.setDecor(new Decor(Type.Real));
+			Decor decConv = new Decor(Type.Real);
+			//On ajoute un registre pour enregistrer la conversion 
+			decConv.setInfoCode(a.getFils1().getDecor().getInfoCode()+1);
+			a.setDecor(decConv);
 			return Type.Real;
 			
 		case Entier:
 			//System.out.println("Entier");
-			a.setDecor(new Decor(Type.Integer));
+			Decor decEnt = new Decor(Type.Integer) ; 
+			decEnt.setInfoCode(0);
+			a.setDecor(decEnt);
 			return Type.Integer;
 			
 		case Reel:
-			a.setDecor(new Decor(Type.Real));
+			Decor decReal = new Decor(Type.Real);
+			decReal.setInfoCode(0);
+			a.setDecor(decReal);
 			return Type.Real;
 			
 		case Chaine:
-			a.setDecor(new Decor(Type.String));
+			Decor decChaine = new Decor(Type.String);
+			decChaine.setInfoCode(0);
+			a.setDecor(decChaine); 
 			return Type.String; //on est pas sûrs
 			
 		case Ident:
@@ -657,8 +703,26 @@ public class Verif {
 		/* Créer le noeud */
 		Arbre conv = Arbre.creation1(Noeud.Conversion, a.getFils(numFils), a.getNumLigne());
 		/* Le décorer */
-		conv.setDecor(new Decor(Type.Real));
+		Decor decConv = new Decor(Type.Real);
+		decConv.setInfoCode( a.getFils(numFils).getDecor().getInfoCode());
+		conv.setDecor(decConv);
 		/* Le positionner */
 		a.setFils(numFils, conv);
+	}
+	
+	/**************************************************************************
+	 * trouveTaille
+	 * 
+	 * Renvoie le nombre de cases mémoires occupées par l'identificateur en entrée
+	 **************************************************************************/
+	private int trouveTaille(Type t) {
+		if(t.getNature().equals(NatureType.Array)) {
+			int debut = t.getIndice().getBorneInf();
+			int fin = t.getIndice().getBorneSup();
+			return trouveTaille(t.getElement() ) * (fin - debut + 1);
+		}
+		else {
+			return 1;
+		}
 	}
 }
