@@ -7,6 +7,13 @@
    BOV err_stack_ov 
    ADDSP #2 
 ; -------------------------Lecture du programme-------------------------
+; Cas d'une feuille
+   LOAD #1, R1 
+; Cas d'un noeud d'arité 2
+; Cas d'une feuille
+   LOAD 1(GB), R1 
+   ADD #1, R1 ; Addition
+   BOV err_add_ov ; Test de débordement arithmétique
    HALT 
 ; ----------------------Erreurs machine abstraite-----------------------
 err_stack_ov: ; Erreur : Dépassement de la capacité de la pile

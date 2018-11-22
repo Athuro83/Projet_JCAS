@@ -7,6 +7,14 @@
    BOV err_stack_ov 
    ADDSP #2 
 ; -------------------------Lecture du programme-------------------------
+   WSTR "test: " ; Ecrire chaine: test: 
+; Calcul de l'expression avant affichage
+; Cas d'un noeud d'arité 2
+; Cas d'une feuille
+   LOAD #1, R1 
+   DIV #0, R1 ; Division
+   BOV err_add_ov ; Test de débordement arithmétique
+   WINT 
    HALT 
 ; ----------------------Erreurs machine abstraite-----------------------
 err_stack_ov: ; Erreur : Dépassement de la capacité de la pile

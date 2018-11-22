@@ -15,7 +15,7 @@ do
     mv *.ass ../test/gencode/asm ;
     cd ../test/gencode
     echo "---------------------------------------------------------------------"
-    echo "Appuyer sur Return"
-    read r
+    #echo "Appuyer sur Return"
+    #read r
 done
 
