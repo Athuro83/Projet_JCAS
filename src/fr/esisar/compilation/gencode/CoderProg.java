@@ -389,37 +389,72 @@ public class CoderProg {
 				}
 			}
 			else {
-				/* Vérifier si l'expression de droite est une feuille */
 				Prog.ajouter("Cas d'un noeud d'arité 2");
 				
+				/* Créer l'opération */
+				Operation oper = null;
+				switch(a.getNoeud()) {
+				
+				case Plus:
+					oper = Operation.ADD;
+					//Prog.ajouter(Inst.creation2(Operation.ADD, oper_gauche, Operande.opDirect(r)), "Addition");
+					break;
+					
+				case Moins:
+					oper = Operation.SUB;
+					//Prog.ajouter(Inst.creation2(Operation.SUB, oper_gauche, Operande.opDirect(r)), "Soustraction");
+					break;
+					
+				case Mult:
+					oper = Operation.MUL;
+					//Prog.ajouter(Inst.creation2(Operation.MUL, oper_gauche, Operande.opDirect(r)), "Multiplication");
+					break;
+					
+				case Quotient:
+				case DivReel:
+					oper = Operation.DIV;
+					//Prog.ajouter(Inst.creation2(Operation.DIV, oper_gauche, Operande.opDirect(r)), "Division");
+					break;
+				}
+
+				/* Vérifier si l'expression de droite est une feuille */
 				if(isLeaf(a.getFils2())) {
+					Prog.ajouter("Cas simple");
 					/* Calculer l'expression de droite */
 					coder_EXP(a.getFils1(), r);
 					
 					/* Ajouter la feuille de gauche */
 					Operande oper_gauche = generateOperande(a.getFils2());
 					
-					switch(a.getNoeud()) {
-					
-						case Plus:
-							Prog.ajouter(Inst.creation2(Operation.ADD, oper_gauche, Operande.opDirect(r)), "Addition");
-							break;
-							
-						case Moins:
-							Prog.ajouter(Inst.creation2(Operation.SUB, oper_gauche, Operande.opDirect(r)), "Soustraction");
-							break;
-							
-						case Mult:
-							Prog.ajouter(Inst.creation2(Operation.MUL, oper_gauche, Operande.opDirect(r)), "Multiplication");
-							break;
-							
-						case Quotient:
-							Prog.ajouter(Inst.creation2(Operation.DIV, oper_gauche, Operande.opDirect(r)), "Division");
-							break;
-					}
+					Prog.ajouter(Inst.creation2(oper, oper_gauche, Operande.opDirect(r)));
 					
 					/* Vérification d'un éventuel débordement */
 					coder_TEST_ADD_OV();
+				}
+				else {
+					Prog.ajouter("Cas compliqué : Alloc d'un registre");
+					/* Il nous faut un registre supplémentaire ! */
+					if(resteRegistre()) {
+						Prog.ajouter("Il reste des registres");
+						/* Evaluer la sous-expression de gauche */
+						coder_EXP(a.getFils1(), r);
+						
+						/* Allouer un registre pour l'expression de droite */
+						Registre rd = allouerRegistre();
+						
+						/* Evaluer la sous-expression de droite */
+						coder_EXP(a.getFils2(), rd);
+						
+						/* Coder l'opération */
+						Prog.ajouter(Inst.creation2(oper, Operande.opDirect(rd), Operande.opDirect(r)));
+						
+						/* Libérer le registre */
+						libererRegistre(rd);
+					}
+					else {
+						Prog.ajouter("Il ne reste plus de registres, aled");
+						//TODO : Affect temporaire
+					}
 				}
 			}
 		}
@@ -507,9 +542,17 @@ public class CoderProg {
 	
 	// Fonction de détection des erreurs
 	
+	// Détecte les débordements arithmétiques
 	private void coder_TEST_ADD_OV() {
 		
 		Prog.ajouter(Inst.creation1(Operation.BOV, Operande.creationOpEtiq(Etiq.lEtiq("ERR_ADD_OV"))), "Test de débordement arithmétique");
+	}
+	
+	// Cette fonction permet de tester si la place dans la pile est suffisante
+	private void testerPile(int mem_size) {
+		/* Tester si l'espace est suffisant dans la pile */
+		Prog.ajouter(Inst.creation1(Operation.TSTO, Operande.creationOpEntier(mem_size)), "Test de la pile pour " + mem_size + " case(s) mémoire");
+		Prog.ajouter(Inst.creation1(Operation.BOV, Operande.creationOpEtiq(Etiq.lEtiq("ERR_STACK_OV"))));
 	}
 	
 	// Fonctions utilitaires 
@@ -605,12 +648,6 @@ public class CoderProg {
 		Prog.ajouter(Inst.creation1(Operation.POP, Operande.opDirect(R)), "Liberation de la pile et suppression de la variable temporaire");
 	}
 	
-	// Cette fonction permet de tester si la place dans la pile est suffisante
-	private void testerPile(int mem_size) {
-		/* Tester si l'espace est suffisant dans la pile */
-		Prog.ajouter(Inst.creation1(Operation.TSTO, Operande.creationOpEntier(mem_size)), "Test de la pile pour " + mem_size + " case(s) mémoire");
-		Prog.ajouter(Inst.creation1(Operation.BOV, Operande.creationOpEtiq(Etiq.lEtiq("ERR_OV"))));
-	}
 	
 	// Fonctions d'implémentation des erreurs
 	
