@@ -178,8 +178,16 @@ public class Verif {
 			
 			/* On décore le noeud avec ces informations */
 			Decor dec = new Decor(def_ident);
-			/*La déclaration va occuper une case mémoire : on utilise InfoCode pour stocker cette information*/
-			dec.setInfoCode(1);
+			/*La déclaration va occuper des cases mémoire : on utilise InfoCode pour stocker cette information*/
+			if(t.getNature().equals(NatureType.Interval) 
+					 || t.getNature().equals(NatureType.Boolean)
+					 || t.getNature().equals(NatureType.Real)
+					 || t.getNature().equals(NatureType.String)) {
+				dec.setInfoCode(1);
+			}
+			else {
+				
+			}
 			a.setDecor(dec);
 		}
 		else {
