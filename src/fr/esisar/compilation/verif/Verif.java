@@ -174,12 +174,17 @@ public class Verif {
 			
 			/* On enrichit l'environnement avec ce nouvel identificateur */
 			Defn def_ident = Defn.creationVar(t);
+			
+			int temp = trouveTaille(t);
+			
+			def_ident.getType().setTaille(temp);
 			env.enrichir(a.getChaine(), def_ident);
 			
 			/* On décore le noeud avec ces informations */
 			Decor dec = new Decor(def_ident);
 			/*La déclaration va occuper des cases mémoire : on utilise InfoCode pour stocker cette information*/
-			dec.setInfoCode(trouveTaille(t));
+			dec.setInfoCode(temp);
+			t.setTaille(temp);
 			a.setDecor(dec);
 		}
 		else {
