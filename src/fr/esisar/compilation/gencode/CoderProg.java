@@ -45,6 +45,7 @@ public class CoderProg {
 	public void coderProgramme(Arbre a) throws ErreurInst, ErreurOperande {
 		/* Coder le programme */
 		Prog.ajouterComment("Programme JCAS");
+		initialiserRegistre();
 		coder_PROGRAMME(a);
 		Prog.ajouter(Inst.creation0(Operation.HALT));
 		/* Coder les exceptions */
@@ -223,14 +224,7 @@ public class CoderProg {
 		case Nop:
 			break;
 			
-		case Affect:		
-			Decor decor = a.getDecor();
-			Type type = decor.getType();
-			
-			if(type.toString() == "Integer")
-			{
-				
-			}
+		case Affect:
 			break;
 			
 		case Pour:
@@ -261,10 +255,16 @@ public class CoderProg {
 	/**************************************************************************
 	 * PLACE
 	 **************************************************************************/
-	private void coder_PLACE(Arbre a, boolean setDecor)  {
+	private int coder_PLACE(Arbre a)  {
 		switch(a.getNoeud()) {
 		
 		case Ident:
+			if(testerID(a.getChaine())) {
+				offsetID.get(a.getChaine());
+			}
+			else {
+				allouerOffsetID(a.getChaine(), a.getDecor().getType().getTaille());			
+			}
 			break;
 			
 		case Index:
@@ -390,6 +390,8 @@ public class CoderProg {
 			//throw new ErreurInterneVerif("Arbre incorrect dans verifier_PAS");
 		}
 	}
+	
+	
 	// Fonctions utilitaires 
 	
 	// Cette fonction initialise l'etat de tous les registres
@@ -439,6 +441,12 @@ public class CoderProg {
 	// Cette fonction permet d'avoir l'offset associe a l'id en argument
 	private int getOffset(String id) {
 		return offsetID.get(id);
+	}
+	
+	// Cette fonction teste si l'id en argument est deja declare dans la hashmap
+	// true -> l'id existe / false -> l'id n'est pas dans la hashmap
+	private boolean testerID(String id) {
+		return offsetID.containsKey(id);
 	}
 	
 	// Cette fonction permet d'allouer une place en pile pour une varibale temporaire
