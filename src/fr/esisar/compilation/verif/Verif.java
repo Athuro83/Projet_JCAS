@@ -174,12 +174,17 @@ public class Verif {
 			
 			/* On enrichit l'environnement avec ce nouvel identificateur */
 			Defn def_ident = Defn.creationVar(t);
+			
+			int temp = trouveTaille(t);
+			
+			def_ident.getType().setTaille(temp);
 			env.enrichir(a.getChaine(), def_ident);
 			
 			/* On décore le noeud avec ces informations */
 			Decor dec = new Decor(def_ident);
 			/*La déclaration va occuper des cases mémoire : on utilise InfoCode pour stocker cette information*/
-			dec.setInfoCode(trouveTaille(t));
+			dec.setInfoCode(temp);
+			t.setTaille(temp);
 			a.setDecor(dec);
 		}
 		else {
@@ -190,10 +195,12 @@ public class Verif {
 				ErreurContext.ErreurPasDeclare.leverErreurContext(null, a.getNumLigne());
 			}
 			
-			/* On décore l'identificateur avec sa Defn et son Type */
 			Decor dec = new Decor(def, def.getType()) ;
-			// on utilise un registre pour enregistrer la valeur dans un ident 
+			
 			dec.setInfoCode(1);
+			dec.getType().setTaille(def.getType().getTaille());
+			
+			
 			a.setDecor(dec);
 		}
 	}
