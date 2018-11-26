@@ -80,13 +80,13 @@ public class CoderProg {
 	private void coder_LISTE_DECL(Arbre a)  {
 
 		/* Récupérer la valeur d'infoCode */
-		/*Decor dec = a.getDecor();
+		Decor dec = a.getDecor();
 		if(dec == null) {
 			throw new RuntimeException("Pas de décor sur le noeud racine LISTE_DECL");
-		}*/
+		}
 		
 		/* Récupérer la taille des variables globales */
-		int mem_size =  2/*dec.getInfoCode()*/;
+		int mem_size =  dec.getInfoCode();
 		
 		/* Tester si l'espace est suffisant dans la pile */
 		testerPile(mem_size);
@@ -433,23 +433,19 @@ public class CoderProg {
 				
 				case Plus:
 					oper = Operation.ADD;
-					//Prog.ajouter(Inst.creation2(Operation.ADD, oper_gauche, Operande.opDirect(r)), "Addition");
 					break;
 					
 				case Moins:
 					oper = Operation.SUB;
-					//Prog.ajouter(Inst.creation2(Operation.SUB, oper_gauche, Operande.opDirect(r)), "Soustraction");
 					break;
 					
 				case Mult:
 					oper = Operation.MUL;
-					//Prog.ajouter(Inst.creation2(Operation.MUL, oper_gauche, Operande.opDirect(r)), "Multiplication");
 					break;
 					
 				case Quotient:
 				case DivReel:
 					oper = Operation.DIV;
-					//Prog.ajouter(Inst.creation2(Operation.DIV, oper_gauche, Operande.opDirect(r)), "Division");
 					break;
 				}
 
