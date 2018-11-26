@@ -8,6 +8,37 @@ import fr.esisar.compilation.global.src3.*;
 
 public class CoderProg {
 
+	//  HashMap representant l'etat des registres : true -> Libre / false -> Utilise
+	private HashMap<Registre, Boolean> etatRegistre = new HashMap<Registre, Boolean>();
+	
+	// Tableau contenant tous les registres
+	private Registre tabRegistre[] = {Registre.R0, 
+									  Registre.R1, 
+									  Registre.R2, 
+									  Registre.R3, 
+									  Registre.R4, 
+									  Registre.R5, 
+									  Registre.R6, 
+									  Registre.R7, 
+									  Registre.R8, 
+									  Registre.R9, 
+									  Registre.R10, 
+									  Registre.R11, 
+									  Registre.R12, 
+									  Registre.R13, 
+									  Registre.R14, 
+									  Registre.R15} ;
+	
+	// HashMap permettant d'associer un offset a un ID
+	private HashMap<String, Integer> offsetID = new HashMap<String, Integer>();
+	
+	// Integer permettant d'avoir un repere dans l'espace de la pile alloue aux variables
+	// Il pointe sur la premiere case vide
+	private Integer repereOffset = 0;
+	
+	/* Garde en mémoire l'offset du premier mot vide de la pile par rapport à la base de la pile */
+	private int freeWordStackOffset = 1;
+	
 	/**
 	 * Parcours l'arbre abstrait décoré et génère le code pour machine abstraite
 	 * associé.
@@ -15,33 +46,6 @@ public class CoderProg {
 	 * @throws ErreurInst
 	 * @throws ErreurOperande
 	 */
-	
-	//  HashMap representant l'etat des registres : true -> Libre / false -> Utilise
-	HashMap<Registre, Boolean> etatRegistre = new HashMap<Registre, Boolean>();
-	// Tableau contenant tous les registres
-	Registre tabRegistre[] = {Registre.R0, 
-							  Registre.R1, 
-							  Registre.R2, 
-							  Registre.R3, 
-							  Registre.R4, 
-							  Registre.R5, 
-							  Registre.R6, 
-							  Registre.R7, 
-							  Registre.R8, 
-							  Registre.R9, 
-							  Registre.R10, 
-							  Registre.R11, 
-							  Registre.R12, 
-							  Registre.R13, 
-							  Registre.R14, 
-							  Registre.R15} ;
-	
-	// HashMap permettant d'associer un offset a un ID
-	HashMap<String, Integer> offsetID = new HashMap<String, Integer>();
-	// Integer permettant d'avoir un repere dans l'espace de la pile alloue aux variables
-	// Il pointe sur la premiere case vide
-	Integer repereOffset = 0;
-	
 	public void coderProgramme(Arbre a) throws ErreurInst, ErreurOperande {
 		/* Coder le programme */
 		Prog.ajouterComment("Programme JCAS");
@@ -88,6 +92,7 @@ public class CoderProg {
 		
 		/* Réserver l'espace pour les variables */
 		Prog.ajouter(Inst.creation1(Operation.ADDSP, Operande.creationOpEntier(mem_size)));
+		this.freeWordStackOffset += mem_size;
 	}
 
 	/**************************************************************************
@@ -339,11 +344,15 @@ public class CoderProg {
 			default:
 				/* Expressions qui demandent un calcul avant affichage */
 				Prog.ajouter("Calcul de l'expression avant affichage");
-				/* Réserver le registre R1 */
-				//TODO
 				
-				/* Calculer l'expression dans R1 */
-				coder_EXP(a, Registre.R1);
+				/* Calculer l'expression */
+				Registre r = allouerRegistre();
+				coder_EXP(a, r);
+				
+				/* Charger la valeur dans le registre d'affichage */
+				if(r != Registre.R1) {
+					Prog.ajouter(Inst.creation2(Operation.LOAD, Operande.opDirect(r), Operande.opDirect(Registre.R1)));
+				}
 				
 				/* Afficher correctement l'expression */
 				Decor dec = a.getDecor();
@@ -353,6 +362,9 @@ public class CoderProg {
 				else {
 					Prog.ajouter(Inst.creation0(Operation.WFLOAT));
 				}
+				
+				/* Libérer le registre R1 */
+				libererRegistre(r);
 		}
 	}
 	
@@ -435,7 +447,7 @@ public class CoderProg {
 					Prog.ajouter("Cas compliqué : Alloc d'un registre");
 					/* Il nous faut un registre supplémentaire ! */
 					if(resteRegistre()) {
-						Prog.ajouter("Il reste des registres");
+						Prog.ajouter("Il reste des registres : évaluation gauche -> droite");
 						/* Evaluer la sous-expression de gauche */
 						coder_EXP(a.getFils1(), r);
 						
@@ -452,8 +464,22 @@ public class CoderProg {
 						libererRegistre(rd);
 					}
 					else {
-						Prog.ajouter("Il ne reste plus de registres, aled");
+						Prog.ajouter("Il ne reste plus de registres, évaluation droite -> gauche");
 						//TODO : Affect temporaire
+						/* Evaluer l'expression de gauche */
+						coder_EXP(a.getFils2(), r);
+						
+						/* Stocker le résultat dans une variable temporaire */
+						int offsetTmp = allouerTemp(r);
+						
+						/* Evaluer l'expression de droite */
+						coder_EXP(a.getFils1(), r);
+						
+						/* Evaluer l'expression du noeud */
+						Prog.ajouter(Inst.creation2(oper, Operande.creationOpIndirect(offsetTmp, Registre.GB), Operande.opDirect(r)));
+						
+						/* Libérer la variable temporaire */
+						libererTemp();
 					}
 				}
 			}
@@ -638,14 +664,28 @@ public class CoderProg {
 	}
 	
 	// Cette fonction permet d'allouer une place en pile pour une varibale temporaire
-	private void allouerTemp(Registre R) {
+	// Elle retourne l'offset auquel se trouve la variable temporaire et met à jour le pointeur de pile
+	private int allouerTemp(Registre R) {
+		/* Tester si il reste de la place dans la pile */
 		testerPile(1);
-		Prog.ajouter(Inst.creation1(Operation.PUSH, Operande.opDirect(R)), "Allocation d'une variable temporaire");
+		
+		/* Sauvegarder la valeur du registre dans la pile */
+		Prog.ajouter(Inst.creation2(Operation.STORE, Operande.opDirect(R), Operande.creationOpIndirect(this.freeWordStackOffset, Registre.GB)), "Stocker la valeur de " + R + " dans la pile (offset " + this.freeWordStackOffset + ")");
+		
+		/* Mettre à jour le pointeur de pile */
+		Prog.ajouter(Inst.creation1(Operation.ADDSP, Operande.creationOpEntier(1)));
+		this.freeWordStackOffset += 1;
+		
+		/* Retourner l'offset de la variable temporaire */
+		return this.freeWordStackOffset - 1;
 	}
 	
 	// Cette fonction permet de liberer la place dans la pile allouee a une variable temporaire
-	private void libererTemp(Registre R) {
-		Prog.ajouter(Inst.creation1(Operation.POP, Operande.opDirect(R)), "Liberation de la pile et suppression de la variable temporaire");
+	private void libererTemp() {
+
+		/* Mettre à jour le pointeur de pile */
+		this.freeWordStackOffset -= 1;
+		Prog.ajouter(Inst.creation1(Operation.SUBSP, Operande.creationOpEntier(1)), "Libération de la variable temporaire (offset " + this.freeWordStackOffset + ")");
 	}
 	
 	
