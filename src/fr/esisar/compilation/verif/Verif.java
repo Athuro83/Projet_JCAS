@@ -195,10 +195,12 @@ public class Verif {
 				ErreurContext.ErreurPasDeclare.leverErreurContext(null, a.getNumLigne());
 			}
 			
-			/* On décore l'identificateur avec sa Defn et son Type */
 			Decor dec = new Decor(def, def.getType()) ;
-			// on utilise un registre pour enregistrer la valeur dans un ident 
+			
 			dec.setInfoCode(1);
+			dec.getType().setTaille(def.getType().getTaille());
+			
+			
 			a.setDecor(dec);
 		}
 	}
