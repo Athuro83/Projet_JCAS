@@ -34,7 +34,7 @@ public class CoderProg {
 	
 	// Integer permettant d'avoir un repere dans l'espace de la pile alloue aux variables
 	// Il pointe sur la premiere case vide
-	private Integer repereOffset = 0;
+	private Integer repereOffset = 1;
 	
 	/* Garde en mémoire l'offset du premier mot vide de la pile par rapport à la base de la pile */
 	private int freeWordStackOffset = 1;
@@ -46,6 +46,7 @@ public class CoderProg {
 	 * @throws ErreurInst
 	 * @throws ErreurOperande
 	 */
+
 	public void coderProgramme(Arbre a) throws ErreurInst, ErreurOperande {
 		/* Coder le programme */
 		Prog.ajouterComment("Programme JCAS");
@@ -231,7 +232,16 @@ public class CoderProg {
 			break;
 			
 		case Affect:
-			coder_EXP(a.getFils2(), Registre.R1);
+			// On teste s'il reste des registres, normalement il y en a toujours
+			if(resteRegistre())
+			{
+				Registre r = allouerRegistre();
+				coder_EXP(a.getFils2(), r);
+				// On recupere l'offset de notre ID (ou on le cree s'il n'existe pas encore)
+				int offset = coder_PLACE(a.getFils1());
+				Prog.ajouter(Inst.creation2(Operation.STORE, Operande.opDirect(r), Operande.creationOpIndirect(offset, Registre.GB)), "Affectation ligne "+a.getNumLigne());
+				libererRegistre(r);
+			}
 			break;
 			
 		case Pour:
@@ -262,18 +272,17 @@ public class CoderProg {
 	/**************************************************************************
 	 * PLACE
 	 **************************************************************************/
-	private void coder_PLACE(Arbre a)  {
+	private int coder_PLACE(Arbre a)  {
 		switch(a.getNoeud()) {
 		
 		case Ident:
-			if(testerID(a.getChaine())) {
-				offsetID.get(a.getChaine());
+			// Si l'ID n'existe pas, on l'alloue dans la hashmap
+			if(!testerID(a.getChaine())) {
+				allouerOffsetID(a.getChaine(), a);	
 			}
-			else {
-				allouerOffsetID(a.getChaine(), a.getDecor().getType().getTaille());			
-			}
-			break;
-			
+			// On retourne l'offset correspondant a l'ID
+			return getOffset(a.getChaine());
+
 		case Index:
 			break;
 			
@@ -281,6 +290,7 @@ public class CoderProg {
 			break;
 			//throw new ErreurInterneVerif("Arbre incorrect dans verifier_PLACE");
 		}
+		return 0;
 	}
 
 	/**************************************************************************
@@ -337,8 +347,22 @@ public class CoderProg {
 				
 			case Ident:
 				/* Vérifier la nature de l'identificateur */
+				Operande ident = generateOperande(a);
 				
-				/* Afficher la valeur de l'identificateur */
+				// Si le type est un Integer 
+				if(a.getDecor().getType() == Type.Integer) {
+					Prog.ajouter(Inst.creation2(Operation.LOAD, generateOperande(a), Operande.R1));
+					Prog.ajouter(Inst.creation0(Operation.WINT), "Ecrire valeur de "+a.getChaine());
+				}
+				// Si le type est un Real
+				else if (a.getDecor().getType() == Type.Real) {
+					Prog.ajouter(Inst.creation2(Operation.LOAD, generateOperande(a), Operande.R1));
+					Prog.ajouter(Inst.creation0(Operation.WFLOAT), "Ecrire valeur de " + a.getChaine());
+				}
+				// Si le type est une String ou un Boolean on jette une exception
+				else {
+					throw new ErreurInst("L'affichage n'est pas possible pour ce type.");
+				}						
 				break;
 				
 			default:
@@ -594,7 +618,7 @@ public class CoderProg {
 
 			case Ident:
 				/* Chercher où est stocké la valeur de l'identificateur */
-				int offset = 1 /*getOffset(a.getChaine())*/;
+				int offset = getOffset(a.getChaine());
 				
 				/* Retourner l'opérande correspondant */
 				return Operande.creationOpIndirect(offset, Registre.GB);
@@ -647,9 +671,9 @@ public class CoderProg {
 	}
 	
 	// Cette fonction permet de stocker l'offset correspondant à l'ID
-	private void allouerOffsetID(String id, int sizeID) {
+	private void allouerOffsetID(String id, Arbre arbreID) {
 		offsetID.put(id, repereOffset);
-		repereOffset += sizeID;
+		repereOffset += arbreID.getDecor().getType().getTaille();
 	}
 	
 	// Cette fonction permet d'avoir l'offset associe a l'id en argument
@@ -687,7 +711,6 @@ public class CoderProg {
 		this.freeWordStackOffset -= 1;
 		Prog.ajouter(Inst.creation1(Operation.SUBSP, Operande.creationOpEntier(1)), "Libération de la variable temporaire (offset " + this.freeWordStackOffset + ")");
 	}
-	
 	
 	// Fonctions d'implémentation des erreurs
 	
