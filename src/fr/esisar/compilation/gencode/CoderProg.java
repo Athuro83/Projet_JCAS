@@ -251,6 +251,28 @@ public class CoderProg {
 			break;
 
 		case Si:
+			
+			if(a.getFils3()!=null) {
+				Etiq etiqSinon = Etiq.nouvelle("E_sinon");
+				Etiq etiqFin = Etiq.nouvelle("E_fin");
+				
+				coder_COND(a.getFils1(), false, etiqSinon);
+				coder_LISTE_INST(a.getFils2());
+				Prog.ajouter(Inst.creation1(Operation.BRA, Operande.creationOpEtiq(etiqFin)));
+				Prog.ajouter(etiqSinon);
+				coder_LISTE_INST(a.getFils3());
+				Prog.ajouter(etiqFin);
+			}
+			
+			else {
+				Etiq etiqFin = Etiq.nouvelle("E_fin");
+				
+				coder_COND(a.getFils1(), false, etiqFin);
+				coder_LISTE_INST(a.getFils2());
+				Prog.ajouter(etiqFin);
+				
+			}
+			
 			break;
 
 		case Lecture:
@@ -299,6 +321,45 @@ public class CoderProg {
 		}
 	}
 
+	/**************************************************************************
+	 * COND
+	 **************************************************************************/
+	private void coder_COND(Arbre a, boolean comparaison, Etiq etiquette) {
+		Registre r1=allouerRegistre();
+		Registre r2=allouerRegistre();
+		
+		switch(a.getNoeud()) {
+		case Et:
+			break;
+		case Ou:
+			break;
+		case Sup:
+			break;
+		case Inf:
+			coder_EXP(a.getFils1(), r1);
+			coder_EXP(a.getFils2(),r2);
+			if(comparaison) {
+				Prog.ajouter(Inst.creation2(Operation.CMP, Operande.opDirect(r2), Operande.opDirect(r1)));
+				Prog.ajouter(Inst.creation1(Operation.BLT, Operande.creationOpEtiq(etiquette)));
+			}
+			else {
+				Prog.ajouter(Inst.creation2(Operation.CMP, Operande.opDirect(r2), Operande.opDirect(r1)));
+				Prog.ajouter(Inst.creation1(Operation.BLE, Operande.creationOpEtiq(etiquette)));
+			}
+			break;
+		case InfEgal:
+			break;
+		case SupEgal:
+			break;
+		case Egal:
+			break;
+		case NonEgal:
+			break;
+		}
+		libererRegistre(r1);
+		libererRegistre(r2);
+	}
+	
 	/**************************************************************************
 	 * PLACE
 	 **************************************************************************/
