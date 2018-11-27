@@ -237,12 +237,11 @@ public class CoderProg {
 			
 		case Si:
 			
-			
 			if(a.getFils3()!=null) {
 				Etiq etiqSinon = Etiq.nouvelle("E_sinon");
 				Etiq etiqFin = Etiq.nouvelle("E_fin");
 				
-//				coder_COND(a.getFils1(), false, etiqSinon);
+				coder_COND(a.getFils1(), false, etiqSinon);
 				coder_LISTE_INST(a.getFils2());
 				Prog.ajouter(Inst.creation1(Operation.BRA, Operande.creationOpEtiq(etiqFin)));
 				Prog.ajouter(etiqSinon);
@@ -253,7 +252,7 @@ public class CoderProg {
 			else {
 				Etiq etiqFin = Etiq.nouvelle("E_fin");
 				
-//				coder_COND(a.getFils1(), false, a.getFils3());
+				coder_COND(a.getFils1(), false, etiqFin);
 				coder_LISTE_INST(a.getFils2());
 				Prog.ajouter(etiqFin);
 				
@@ -275,6 +274,45 @@ public class CoderProg {
 		default:
 			//throw new ErreurInterneVerif("Arbre incorrect dans verifier_INST");
 		}
+	}
+	
+	/**************************************************************************
+	 * COND
+	 **************************************************************************/
+	private void coder_COND(Arbre a, boolean comparaison, Etiq etiquette) {
+		Registre r1=allouerRegistre();
+		Registre r2=allouerRegistre();
+		
+		switch(a.getNoeud()) {
+		case Et:
+			break;
+		case Ou:
+			break;
+		case Sup:
+			break;
+		case Inf:
+			coder_EXP(a.getFils1(), r1);
+			coder_EXP(a.getFils2(),r2);
+			if(comparaison) {
+				Prog.ajouter(Inst.creation2(Operation.CMP, Operande.opDirect(r2), Operande.opDirect(r1)));
+				Prog.ajouter(Inst.creation1(Operation.BLT, Operande.creationOpEtiq(etiquette)));
+			}
+			else {
+				Prog.ajouter(Inst.creation2(Operation.CMP, Operande.opDirect(r2), Operande.opDirect(r1)));
+				Prog.ajouter(Inst.creation1(Operation.BLE, Operande.creationOpEtiq(etiquette)));
+			}
+			break;
+		case InfEgal:
+			break;
+		case SupEgal:
+			break;
+		case Egal:
+			break;
+		case NonEgal:
+			break;
+		}
+		libererRegistre(r1);
+		libererRegistre(r2);
 	}
 	
 	/**************************************************************************
@@ -632,7 +670,7 @@ public class CoderProg {
 	private void testerPile(int mem_size) {
 		/* Tester si l'espace est suffisant dans la pile */
 		Prog.ajouter(Inst.creation1(Operation.TSTO, Operande.creationOpEntier(mem_size)), "Test de la pile pour " + mem_size + " case(s) mémoire");
-		Prog.ajouter(Inst.creation1(Operation.BOV, Operande.creationOpEtiq(Etiq.lEtiq("ERR_OV"))));
+		Prog.ajouter(Inst.creation1(Operation.BOV, Operande.creationOpEtiq(Etiq.lEtiq("ERR_STACK_OV"))));
 	}
 	
 	// Fonctions d'implémentation des erreurs
