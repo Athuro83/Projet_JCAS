@@ -236,6 +236,29 @@ public class CoderProg {
 			break;
 			
 		case Si:
+			
+			
+			if(a.getFils3()!=null) {
+				Etiq etiqSinon = Etiq.nouvelle("E_sinon");
+				Etiq etiqFin = Etiq.nouvelle("E_fin");
+				
+//				coder_COND(a.getFils1(), false, etiqSinon);
+				coder_LISTE_INST(a.getFils2());
+				Prog.ajouter(Inst.creation1(Operation.BRA, Operande.creationOpEtiq(etiqFin)));
+				Prog.ajouter(etiqSinon);
+				coder_LISTE_INST(a.getFils3());
+				Prog.ajouter(etiqFin);
+			}
+			
+			else {
+				Etiq etiqFin = Etiq.nouvelle("E_fin");
+				
+//				coder_COND(a.getFils1(), false, a.getFils3());
+				coder_LISTE_INST(a.getFils2());
+				Prog.ajouter(etiqFin);
+				
+			}
+			
 			break;
 			
 		case Lecture:
