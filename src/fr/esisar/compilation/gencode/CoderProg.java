@@ -44,7 +44,7 @@ public class CoderProg {
 	 * associé.
 	 * @param a
 	 * @throws ErreurInst
-	 * @throws ErreurOperande
+	 * @throws ErreurOperande 
 	 */
 
 	public void coderProgramme(Arbre a) throws ErreurInst, ErreurOperande {
@@ -392,7 +392,7 @@ public class CoderProg {
 		}
 	}
 	
-	private Type coder_EXP(Arbre a, Registre r)  {
+	private void coder_EXP(Arbre a, Registre r)  {
 		/* On vérifie si l'on est sur une feuille de l'arbre */
 		if(isLeaf(a)) {
 			/* Charger la valeur dans le registre */
@@ -429,6 +429,8 @@ public class CoderProg {
 				
 				/* Créer l'opération */
 				Operation oper = null;
+				Registre r1;
+				Registre r2;
 				switch(a.getNoeud()) {
 				
 				case Plus:
@@ -451,7 +453,86 @@ public class CoderProg {
 					oper = Operation.DIV;
 					//Prog.ajouter(Inst.creation2(Operation.DIV, oper_gauche, Operande.opDirect(r)), "Division");
 					break;
+				case Egal :
+					// On alloue 2 registres pour les 2 expressions a comparer
+					r1 = allouerRegistre();
+					r2 = allouerRegistre();
+					// On calcule les valeurs des expressions
+					coder_EXP(a.getFils1(), r1);
+					coder_EXP(a.getFils2(), r2);
+					// On insere la comparaison qui permet de mettre a jour les flags
+					Prog.ajouter(Inst.creation2(Operation.CMP, Operande.opDirect(r1), Operande.opDirect(r2)), "Comparaison");
+					// On tcheck le flag EQ qui a ete mis a jour par le CMP pour assigner la valeur dans le registre r
+					Prog.ajouter(Inst.creation1(Operation.SEQ, Operande.opDirect(r)), "Controle du flag EQ");
+					libererRegistre(r1);
+					libererRegistre(r2);
+				case Inf :
+					// On alloue 2 registres pour les 2 expressions a comparer
+					r1 = allouerRegistre();
+					r2 = allouerRegistre();
+					// On calcule les valeurs des expressions
+					coder_EXP(a.getFils1(), r1);
+					coder_EXP(a.getFils2(), r2);
+					// On insere la comparaison qui permet de mettre a jour les flags
+					Prog.ajouter(Inst.creation2(Operation.CMP, Operande.opDirect(r1), Operande.opDirect(r2)), "Comparaison");
+					// On tcheck le flag LT qui a ete mis a jour par le CMP pour assigner la valeur dans le registre r
+					Prog.ajouter(Inst.creation1(Operation.SLT, Operande.opDirect(r)), "Controle du flag LT");
+					libererRegistre(r1);
+					libererRegistre(r2);
+				case SupEgal :
+					// On alloue 2 registres pour les 2 expressions a comparer
+					r1 = allouerRegistre();
+					r2 = allouerRegistre();
+					// On calcule les valeurs des expressions
+					coder_EXP(a.getFils1(), r1);
+					coder_EXP(a.getFils2(), r2);
+					// On insere la comparaison qui permet de mettre a jour les flags
+					Prog.ajouter(Inst.creation2(Operation.CMP, Operande.opDirect(r1), Operande.opDirect(r2)), "Comparaison");
+					// On tcheck le flag GE qui a ete mis a jour par le CMP pour assigner la valeur dans le registre r
+					Prog.ajouter(Inst.creation1(Operation.SGE, Operande.opDirect(r)), "Controle du flag GE");
+					libererRegistre(r1);
+					libererRegistre(r2);
+				case InfEgal :
+					// On alloue 2 registres pour les 2 expressions a comparer
+					r1 = allouerRegistre();
+					r2 = allouerRegistre();
+					// On calcule les valeurs des expressions
+					coder_EXP(a.getFils1(), r1);
+					coder_EXP(a.getFils2(), r2);
+					// On insere la comparaison qui permet de mettre a jour les flags
+					Prog.ajouter(Inst.creation2(Operation.CMP, Operande.opDirect(r1), Operande.opDirect(r2)), "Comparaison");
+					// On tcheck le flag LE qui a ete mis a jour par le CMP pour assigner la valeur dans le registre r
+					Prog.ajouter(Inst.creation1(Operation.SLE, Operande.opDirect(r)), "Controle du flag LE");
+					libererRegistre(r1);
+					libererRegistre(r2);
+				case Sup :
+					// On alloue 2 registres pour les 2 expressions a comparer
+					r1 = allouerRegistre();
+					r2 = allouerRegistre();
+					// On calcule les valeurs des expressions
+					coder_EXP(a.getFils1(), r1);
+					coder_EXP(a.getFils2(), r2);
+					// On insere la comparaison qui permet de mettre a jour les flags
+					Prog.ajouter(Inst.creation2(Operation.CMP, Operande.opDirect(r1), Operande.opDirect(r2)), "Comparaison");
+					// On tcheck le flag GT qui a ete mis a jour par le CMP pour assigner la valeur dans le registre r
+					Prog.ajouter(Inst.creation1(Operation.SGT, Operande.opDirect(r)), "Controle du flag GT");
+					libererRegistre(r1);
+					libererRegistre(r2);
+				case NonEgal :
+					// On alloue 2 registres pour les 2 expressions a comparer
+					r1 = allouerRegistre();
+					r2 = allouerRegistre();
+					// On calcule les valeurs des expressions
+					coder_EXP(a.getFils1(), r1);
+					coder_EXP(a.getFils2(), r2);
+					// On insere la comparaison qui permet de mettre a jour les flags
+					Prog.ajouter(Inst.creation2(Operation.CMP, Operande.opDirect(r1), Operande.opDirect(r2)), "Comparaison");
+					// On tcheck le flag NE qui a ete mis a jour par le CMP pour assigner la valeur dans le registre r
+					Prog.ajouter(Inst.creation1(Operation.SNE, Operande.opDirect(r)), "Controle du flag NE");
+					libererRegistre(r1);
+					libererRegistre(r2);
 				}
+				
 
 				/* Vérifier si l'expression de droite est une feuille */
 				if(isLeaf(a.getFils2())) {
@@ -508,12 +589,13 @@ public class CoderProg {
 				}
 			}
 		}
-		
 		switch(a.getNoeud()) {
 		
 		/* Tous les opérateurs binaires */
 		case Et :
+			break;
 		case Ou :
+			break;
 		case Plus:
 		case Moins:
 		case Mult:
@@ -526,37 +608,29 @@ public class CoderProg {
 		case InfEgal :
 		case Sup :
 		case NonEgal :
-			return null;
-
+			break;
 			
 		case PlusUnaire:
 		case MoinsUnaire:
 		case Non:
-			return null;
-
+			break;
 			
 		case Index:
-			return null;
-			
+			break;
 		case Conversion:
-			return null;
-			
+			break;
 		case Entier:
-			return null;
-			
+			break;
 		case Reel:
-			return null;
-			
+			break;
 		case Chaine:
-			return null;
-			
+			break;
 		case Ident:
-			return null;
-			
+			break;
 		default:
-			return null;
+			break;
 			//throw new ErreurInterneVerif("Arbre incorrect dans verifier_EXP");
-		}
+		}		
 	}
 
 	/**************************************************************************
