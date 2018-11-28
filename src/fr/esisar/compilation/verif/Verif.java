@@ -567,7 +567,7 @@ public class Verif {
 				/* ERREUR: Opération unaire illégale ! */
 				ErreurContext.ErreurType.leverErreurContext(null, a.getNumLigne());
 			}
-			
+						
 			/* Décoration du noeud */
 			Decor decu = new Decor(res_unaire.getTypeRes()) ; 
 			decu.setInfoCode(a.getFils1().getDecor().getInfoCode());
@@ -648,9 +648,11 @@ public class Verif {
 				if(getTypeNoeud(a.getFils(i)) != Type.Integer) {
 					/* ERREUR CONTEXTE : Mauvais typage dans le pas */
 					//TODO : Nouvelle erreur ?
+					System.out.println("Fils " + i + " de type " + getTypeNoeud(a.getFils(i)));
 					throw new ErreurInterneVerif("Mauvais typage dans le pas (ligne " + a.getNumLigne() + ")");
 				}
 			}
+			
 			break;
 			
 		default:
