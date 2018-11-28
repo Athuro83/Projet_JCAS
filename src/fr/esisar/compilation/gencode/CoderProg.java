@@ -44,7 +44,7 @@ public class CoderProg {
 	 * associé.
 	 * @param a
 	 * @throws ErreurInst
-	 * @throws ErreurOperande
+	 * @throws ErreurOperande 
 	 */
 
 	public void coderProgramme(Arbre a) throws ErreurInst, ErreurOperande {
@@ -334,26 +334,70 @@ public class CoderProg {
 		case Ou:
 			break;
 		case Sup:
-			break;
-		case Inf:
 			coder_EXP(a.getFils1(), r1);
-			coder_EXP(a.getFils2(),r2);
+			coder_EXP(a.getFils2(), r2);
+			Prog.ajouter(Inst.creation2(Operation.CMP, Operande.opDirect(r2), Operande.opDirect(r1)));
 			if(comparaison) {
-				Prog.ajouter(Inst.creation2(Operation.CMP, Operande.opDirect(r2), Operande.opDirect(r1)));
-				Prog.ajouter(Inst.creation1(Operation.BLT, Operande.creationOpEtiq(etiquette)));
+				Prog.ajouter(Inst.creation1(Operation.BGT, Operande.creationOpEtiq(etiquette)));
 			}
 			else {
-				Prog.ajouter(Inst.creation2(Operation.CMP, Operande.opDirect(r2), Operande.opDirect(r1)));
 				Prog.ajouter(Inst.creation1(Operation.BLE, Operande.creationOpEtiq(etiquette)));
 			}
 			break;
+		case Inf:
+			coder_EXP(a.getFils1(), r1);
+			coder_EXP(a.getFils2(), r2);
+			Prog.ajouter(Inst.creation2(Operation.CMP, Operande.opDirect(r2), Operande.opDirect(r1)));
+			if(comparaison) {
+				Prog.ajouter(Inst.creation1(Operation.BLT, Operande.creationOpEtiq(etiquette)));
+			}
+			else {
+				Prog.ajouter(Inst.creation1(Operation.BGE, Operande.creationOpEtiq(etiquette)));
+			}
+			break;
 		case InfEgal:
+			coder_EXP(a.getFils1(), r1);
+			coder_EXP(a.getFils2(), r2);
+			Prog.ajouter(Inst.creation2(Operation.CMP, Operande.opDirect(r2), Operande.opDirect(r1)));
+			if(comparaison) {
+				Prog.ajouter(Inst.creation1(Operation.BLE, Operande.creationOpEtiq(etiquette)));
+			}
+			else {
+				Prog.ajouter(Inst.creation1(Operation.BGT, Operande.creationOpEtiq(etiquette)));
+			}
 			break;
 		case SupEgal:
+			coder_EXP(a.getFils1(), r1);
+			coder_EXP(a.getFils2(), r2);
+			Prog.ajouter(Inst.creation2(Operation.CMP, Operande.opDirect(r2), Operande.opDirect(r1)));
+			if(comparaison) {
+				Prog.ajouter(Inst.creation1(Operation.BGE, Operande.creationOpEtiq(etiquette)));
+			}
+			else {
+				Prog.ajouter(Inst.creation1(Operation.BLT, Operande.creationOpEtiq(etiquette)));
+			}
 			break;
 		case Egal:
+			coder_EXP(a.getFils1(), r1);
+			coder_EXP(a.getFils2(), r2);
+			Prog.ajouter(Inst.creation2(Operation.CMP, Operande.opDirect(r2), Operande.opDirect(r1)));
+			if(comparaison) {
+				Prog.ajouter(Inst.creation1(Operation.BEQ, Operande.creationOpEtiq(etiquette)));
+			}
+			else {
+				Prog.ajouter(Inst.creation1(Operation.BNE, Operande.creationOpEtiq(etiquette)));
+			}
 			break;
 		case NonEgal:
+			coder_EXP(a.getFils1(), r1);
+			coder_EXP(a.getFils2(), r2);
+			Prog.ajouter(Inst.creation2(Operation.CMP, Operande.opDirect(r2), Operande.opDirect(r1)));
+			if(comparaison) {
+				Prog.ajouter(Inst.creation1(Operation.BNE, Operande.creationOpEtiq(etiquette)));
+			}
+			else {
+				Prog.ajouter(Inst.creation1(Operation.BEQ, Operande.creationOpEtiq(etiquette)));
+			}
 			break;
 		}
 		libererRegistre(r1);
@@ -483,7 +527,7 @@ public class CoderProg {
 		}
 	}
 
-	private Type coder_EXP(Arbre a, Registre r)  {
+	private void coder_EXP(Arbre a, Registre r)  {
 		/* On vérifie si l'on est sur une feuille de l'arbre */
 		if(isLeaf(a)) {
 			/* Charger la valeur dans le registre */
@@ -520,6 +564,8 @@ public class CoderProg {
 
 				/* Créer l'opération */
 				Operation oper = null;
+				Registre r1;
+				Registre r2;
 				switch(a.getNoeud()) {
 
 				case Plus:
@@ -538,7 +584,92 @@ public class CoderProg {
 				case DivReel:
 					oper = Operation.DIV;
 					break;
+				case Egal :
+					// On alloue 2 registres pour les 2 expressions a comparer
+					r1 = allouerRegistre();
+					r2 = allouerRegistre();
+					// On calcule les valeurs des expressions
+					coder_EXP(a.getFils1(), r1);
+					coder_EXP(a.getFils2(), r2);
+					// On insere la comparaison qui permet de mettre a jour les flags
+					Prog.ajouter(Inst.creation2(Operation.CMP, Operande.opDirect(r2), Operande.opDirect(r1)), "Comparaison");
+					// On tcheck le flag EQ qui a ete mis a jour par le CMP pour assigner la valeur dans le registre r
+					Prog.ajouter(Inst.creation1(Operation.SEQ, Operande.opDirect(r)), "Controle du flag EQ");
+					libererRegistre(r1);
+					libererRegistre(r2);
+					return;
+				case Inf :
+					// On alloue 2 registres pour les 2 expressions a comparer
+					r1 = allouerRegistre();
+					r2 = allouerRegistre();
+					// On calcule les valeurs des expressions
+					coder_EXP(a.getFils1(), r1);
+					coder_EXP(a.getFils2(), r2);
+					// On insere la comparaison qui permet de mettre a jour les flags
+					Prog.ajouter(Inst.creation2(Operation.CMP, Operande.opDirect(r2), Operande.opDirect(r1)), "Comparaison");
+					// On tcheck le flag LT qui a ete mis a jour par le CMP pour assigner la valeur dans le registre r
+					Prog.ajouter(Inst.creation1(Operation.SLT, Operande.opDirect(r)), "Controle du flag LT");
+					libererRegistre(r1);
+					libererRegistre(r2);
+					return;
+				case SupEgal :
+					// On alloue 2 registres pour les 2 expressions a comparer
+					r1 = allouerRegistre();
+					r2 = allouerRegistre();
+					// On calcule les valeurs des expressions
+					coder_EXP(a.getFils1(), r1);
+					coder_EXP(a.getFils2(), r2);
+					// On insere la comparaison qui permet de mettre a jour les flags
+					Prog.ajouter(Inst.creation2(Operation.CMP, Operande.opDirect(r2), Operande.opDirect(r1)), "Comparaison");
+					// On tcheck le flag GE qui a ete mis a jour par le CMP pour assigner la valeur dans le registre r
+					Prog.ajouter(Inst.creation1(Operation.SGE, Operande.opDirect(r)), "Controle du flag GE");
+					libererRegistre(r1);
+					libererRegistre(r2);
+					return;
+				case InfEgal :
+					// On alloue 2 registres pour les 2 expressions a comparer
+					r1 = allouerRegistre();
+					r2 = allouerRegistre();
+					// On calcule les valeurs des expressions
+					coder_EXP(a.getFils1(), r1);
+					coder_EXP(a.getFils2(), r2);
+					// On insere la comparaison qui permet de mettre a jour les flags
+					Prog.ajouter(Inst.creation2(Operation.CMP, Operande.opDirect(r2), Operande.opDirect(r1)), "Comparaison");
+					// On tcheck le flag LE qui a ete mis a jour par le CMP pour assigner la valeur dans le registre r
+					Prog.ajouter(Inst.creation1(Operation.SLE, Operande.opDirect(r)), "Controle du flag LE");
+					libererRegistre(r1);
+					libererRegistre(r2);
+					return;
+				case Sup :
+					// On alloue 2 registres pour les 2 expressions a comparer
+					r1 = allouerRegistre();
+					r2 = allouerRegistre();
+					// On calcule les valeurs des expressions
+					coder_EXP(a.getFils1(), r1);
+					coder_EXP(a.getFils2(), r2);
+					// On insere la comparaison qui permet de mettre a jour les flags
+					Prog.ajouter(Inst.creation2(Operation.CMP, Operande.opDirect(r2), Operande.opDirect(r1)), "Comparaison");
+					// On tcheck le flag GT qui a ete mis a jour par le CMP pour assigner la valeur dans le registre r
+					Prog.ajouter(Inst.creation1(Operation.SGT, Operande.opDirect(r)), "Controle du flag GT");
+					libererRegistre(r1);
+					libererRegistre(r2);
+					return;
+				case NonEgal :
+					// On alloue 2 registres pour les 2 expressions a comparer
+					r1 = allouerRegistre();
+					r2 = allouerRegistre();
+					// On calcule les valeurs des expressions
+					coder_EXP(a.getFils1(), r1);
+					coder_EXP(a.getFils2(), r2);
+					// On insere la comparaison qui permet de mettre a jour les flags
+					Prog.ajouter(Inst.creation2(Operation.CMP, Operande.opDirect(r2), Operande.opDirect(r1)), "Comparaison");
+					// On tcheck le flag NE qui a ete mis a jour par le CMP pour assigner la valeur dans le registre r
+					Prog.ajouter(Inst.creation1(Operation.SNE, Operande.opDirect(r)), "Controle du flag NE");
+					libererRegistre(r1);
+					libererRegistre(r2);
+					return;
 				}
+				
 
 				/* Vérifier si l'expression de droite est une feuille */
 				if(isLeaf(a.getFils2())) {
@@ -594,55 +725,6 @@ public class CoderProg {
 					}
 				}
 			}
-		}
-
-		switch(a.getNoeud()) {
-
-		/* Tous les opérateurs binaires */
-		case Et :
-		case Ou :
-		case Plus:
-		case Moins:
-		case Mult:
-		case DivReel:
-		case Reste:
-		case Quotient:
-		case Egal :
-		case Inf :
-		case SupEgal :
-		case InfEgal :
-		case Sup :
-		case NonEgal :
-			return null;
-
-
-		case PlusUnaire:
-		case MoinsUnaire:
-		case Non:
-			return null;
-
-
-		case Index:
-			return null;
-
-		case Conversion:
-			return null;
-
-		case Entier:
-			return null;
-
-		case Reel:
-			return null;
-
-		case Chaine:
-			return null;
-
-		case Ident:
-			return null;
-
-		default:
-			return null;
-			//throw new ErreurInterneVerif("Arbre incorrect dans verifier_EXP");
 		}
 	}
 
