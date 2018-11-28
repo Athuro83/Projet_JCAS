@@ -1,0 +1,6 @@
+-- Test pour verifier l'instruction de saut de ligne 
+
+program
+begin
+	new_line;
+end.	

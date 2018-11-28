@@ -1,0 +1,8 @@
+-- Test pour verifier le saut de ligne entre l'affichage de deux strings
+
+program
+begin
+	write("string 1");
+	new_line;
+	write("string 2");
+end.

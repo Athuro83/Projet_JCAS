@@ -1,0 +1,7 @@
+-- Test l'affectation d'un boolean a partir d'une non egalitee.
+
+program
+	x : boolean;
+begin
+	x := 3/=4;
+end.

@@ -1,0 +1,8 @@
+-- Test l'affectation d'un boolean a partir d'un test de superiorite
+
+program
+	x : boolean;
+begin
+	x := 3 > 4;
+end.
+

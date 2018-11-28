@@ -1,0 +1,7 @@
+-- Test l'affectation d'un boolean par une egalite
+
+program
+	x : boolean;
+begin
+	x := 3 = 4;
+end.
