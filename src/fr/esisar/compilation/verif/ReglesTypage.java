@@ -351,6 +351,7 @@ public class ReglesTypage {
 	   			}
 	   			else {
 	   				/* Erreur sur le type de l'opérande */
+	   				result.setOk(false);
 	   			}
 	   			break;
 	   			
@@ -362,6 +363,9 @@ public class ReglesTypage {
 	   				case Interval:
 	   					/* Le résultat est de type booléen */
 	   					result.setTypeRes(Type.Integer);
+	   					result.setOk(true);
+	   					break;
+	   					
 	   				case Real:
 	   					/* Le résultat est de type réel */
 	   					result.setTypeRes(Type.Real);
@@ -370,6 +374,7 @@ public class ReglesTypage {
 	   					
 	   				default:
 	   					/* Erreur sur le type de l'opérande */
+	   					result.setOk(false);
 	   					
 	   			}
 	   			break;
