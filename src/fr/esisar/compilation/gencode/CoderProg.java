@@ -252,7 +252,7 @@ public class CoderProg {
 
 		case Si:
 			
-			if(a.getFils3()!=null) {
+			if(!a.getFils3().getNoeud().equals(Noeud.Vide)) {
 				Etiq etiqSinon = Etiq.nouvelle("E_sinon");
 				Etiq etiqFin = Etiq.nouvelle("E_fin");
 				
@@ -470,6 +470,7 @@ public class CoderProg {
 		 * Dans ce dernier cas, on va chercher la valeur de l'identifiant que l'on stocke dans R1 pour ensuite le comparer a 0
 		 * On fait enfin le branchement correspondant
 		 */
+				break;
 		case Ident:
 			switch(a.getChaine()) {
 			case "true":
