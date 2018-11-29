@@ -370,6 +370,7 @@ public class CoderProg {
 			return getOffset(a.getChaine());
 
 		case Index:
+		//	System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" + dimension_tableau(a));
 			break;
 
 		default:
@@ -816,4 +817,13 @@ public class CoderProg {
 		Prog.ajouter(Inst.creation1(Operation.WSTR, Operande.creationOpChaine("Overflow apres une lecture")));
 		Prog.ajouter(Inst.creation0(Operation.HALT));
 	}
+	
+	private int dimension_tableau(Arbre a) {
+		if(a.getFils1().equals(Noeud.Vide)) {
+			return(0);
+		}
+		
+		else return 1 + dimension_tableau(a.getFils1());
+	}
+
 }
