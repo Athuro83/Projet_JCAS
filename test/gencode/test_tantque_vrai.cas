@@ -1,0 +1,9 @@
+-- Test d'une boucle infinie
+
+program
+begin
+    while true do
+        write("infini !");
+        new_line;
+    end;
+end.
