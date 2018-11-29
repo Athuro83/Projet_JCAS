@@ -1,0 +1,11 @@
+-- Valide, on teste une boucle for qui est correct
+
+program
+  i : integer;
+  t : array [1 .. 20] of integer;
+begin
+    for i := 5 to 2 do
+      write(" 4*i :" , 4*i);
+      new_line ; 
+    end;
+end.
