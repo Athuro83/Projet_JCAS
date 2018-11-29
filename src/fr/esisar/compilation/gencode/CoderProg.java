@@ -85,7 +85,7 @@ public class CoderProg {
 		if(dec == null) {
 			throw new RuntimeException("Pas de décor sur le noeud racine LISTE_DECL");
 		}
-		
+
 		/* Récupérer la taille des variables globales */
 		int mem_size =  dec.getInfoCode();
 		/* Tester si l'espace est suffisant dans la pile */
@@ -245,6 +245,62 @@ public class CoderProg {
 			break;
 
 		case Pour:
+			Registre r = allouerRegistre();
+
+			int debut = 0; // récuperer le premier entier
+			int fin = 0; // récuperer le dernier entier
+			if(a.getFils1().getNoeud().equals(Noeud.Increment)) {		
+				
+				/******************************************************
+				IL FAUT REGARDER COMMENT ON A IMPLEMENTER INCREMENT ET DECREMENT DANS LA PASSE 2 
+				
+				IL FAUT GERER LUTILISATION DE L'IDENTIFICATEUR DU FOR DANS LA LISTE D'INSTRUCTION 
+				******************************************************/
+				
+				debut  = a.getFils1().getFils2().getEntier();
+				fin  =  a.getFils1().getFils3().getEntier();
+				
+				
+				Prog.ajouter(Inst.creation2(Operation.LOAD, Operande.creationOpEntier(debut), Operande.opDirect(r))); // LOAD R <- DEBUT 
+				Etiq etiqFOR = Etiq.nouvelle("FOR") ;
+				Prog.ajouter( etiqFOR, "Etiquette pour le FOR"); // FOR :
+				Prog.ajouter(Inst.creation2(Operation.CMP, Operande.creationOpEntier(fin), Operande.opDirect(r)), "Comparer le registre et le 10"); // CMP R, 10 
+	
+				Etiq etiqEXIT = Etiq.nouvelle("EXIT") ; 
+				Prog.ajouter(Inst.creation1(Operation.BGT, Operande.creationOpEtiq(etiqEXIT))); // Branch vers Exit si R>10 
+				Prog.ajouter(Inst.creation2(Operation.ADD, Operande.creationOpEntier(1), Operande.opDirect(r))); // ADD R , 1
+
+				coder_LISTE_INST(a.getFils2()); // coder la liste d'instruction
+
+				Prog.ajouter(Inst.creation1(Operation.BRA, Operande.creationOpEtiq(etiqFOR))); // Branch vers For
+				
+				Prog.ajouter( etiqEXIT, " L'etiquette de la fin du POUR") ; // EXIT : 
+				
+				
+				
+			}else if(a.getFils1().getNoeud().equals(Noeud.Decrement)) {
+				
+				debut = a.getFils1().getFils2().getEntier();
+				fin =  a.getFils1().getFils3().getEntier();
+				
+				Prog.ajouter(Inst.creation2(Operation.LOAD, Operande.creationOpEntier(debut), Operande.opDirect(r))); // LOAD R <- DEBUT 
+				Etiq etiqFOR = Etiq.nouvelle("FOR") ;
+				Prog.ajouter( etiqFOR, "Etiquette pour le FOR"); // FOR :
+				Prog.ajouter(Inst.creation2(Operation.CMP, Operande.creationOpEntier(fin), Operande.opDirect(r)), "Comparer le registre et le 10"); // CMP R, 10 
+	
+				Etiq etiqEXIT = Etiq.nouvelle("EXIT") ; 
+				Prog.ajouter(Inst.creation1(Operation.BLT, Operande.creationOpEtiq(etiqEXIT))); // Branch vers Exit si R<10 
+				Prog.ajouter(Inst.creation2(Operation.SUB, Operande.creationOpEntier(1), Operande.opDirect(r))); // ADD R , 1
+
+				coder_LISTE_INST(a.getFils2()); // coder la liste d'instruction
+
+				Prog.ajouter(Inst.creation1(Operation.BRA, Operande.creationOpEtiq(etiqFOR))); // Branch vers For
+				
+				Prog.ajouter( etiqEXIT, " L'etiquette de la fin du POUR") ; // EXIT : 
+			}
+
+			
+			
 			break;
 
 		case TantQue:
@@ -257,7 +313,7 @@ public class CoderProg {
 			// On teste s'il reste des registres, normalement il y en a toujours
 
 			int offset = coder_PLACE(a.getFils1());
-			
+
 			Decor dec;
 			if( (dec = a.getFils1().getDecor()) == null ) {
 				throw new RuntimeException("lecture n'a pas de decor");
@@ -753,7 +809,7 @@ public class CoderProg {
 		Prog.ajouter(Inst.creation1(Operation.WSTR, Operande.creationOpChaine("Overflow apres operation arithmetique")));
 		Prog.ajouter(Inst.creation0(Operation.HALT));
 	}
-	
+
 	private void coder_ERR_READ_OV() {
 
 		Prog.ajouter(Etiq.lEtiq("ERR_READ_OV"), "Erreur : Dépassement après une lecture");
