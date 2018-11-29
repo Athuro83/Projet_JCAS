@@ -760,40 +760,6 @@ public class CoderProg {
 			}						
 			break;
 			
-		case Index:
-			/* Récupérer l'adresse du tableau */
-			offset = coder_PLACE(a.getFils1(), null);
-			
-			/* Calculer l'index */
-			r = allouerRegistre();
-			coder_EXP(a.getFils2(), r);
-			
-			/* Sauvegarder la valeur de R1 si nécessaire */
-			if(r != Registre.R1) {
-				testerPile(1);
-				Prog.ajouter(Inst.creation1(Operation.PUSH, Operande.R1), "Sauvegarde de la valeur de R1");
-				R1_save = true;
-			}
-			/* Charger la valeur à afficher dans R1 */
-			Prog.ajouter(Inst.creation2(Operation.LOAD, Operande.creationOpIndexe(offset, Registre.GB, r), Operande.opDirect(Registre.R1)));
-			
-			/* Afficher correctement l'expression */
-			dec = a.getDecor();
-			if(dec.getType() == Type.Integer) {
-				Prog.ajouter(Inst.creation0(Operation.WINT));
-			}
-			else {
-				Prog.ajouter(Inst.creation0(Operation.WFLOAT));
-			}
-
-			/* Rétablir la valeur de R1 si nécessaire */
-			if(R1_save) {
-				Prog.ajouter(Inst.creation1(Operation.POP, Operande.R1), "Rétablir la valeur de R1");
-			}
-			/* Libérer le registre */
-			libererRegistre(r);
-
-			break;
 
 		default:
 			/* Expressions qui demandent un calcul avant affichage */
@@ -869,8 +835,9 @@ public class CoderProg {
 
 				/* Créer l'opération */
 				Operation oper = null;
-				Registre r1;
-				Registre r2;
+				Registre r1, r2;
+				int offset;
+				
 				switch(a.getNoeud()) {
 
 				case Plus:
@@ -973,6 +940,18 @@ public class CoderProg {
 					libererRegistre(r1);
 					libererRegistre(r2);
 					return;
+					
+				case Index:
+					/* Récupérer l'adresse du tableau */
+					offset = coder_PLACE(a.getFils1(), null);
+					
+					/* Calculer l'index */
+					coder_EXP(a.getFils2(), r);
+					
+					/* Charger la valeur dans le registre */
+					Prog.ajouter(Inst.creation2(Operation.LOAD, Operande.creationOpIndexe(offset, Registre.GB, r), Operande.opDirect(r)));
+					return;
+
 				}
 				
 
