@@ -1,0 +1,34 @@
+==[ Architecture de la passe 3 ]==
+
+
+*) Architecture générale
+
+L'architecture générale de la passe 3 est assez proche de celle de la passe 2:
+On effectue une descente récursive, moins complête que dans la passe 2, dans
+l'arbre et on traduit les instructions en pseudo-code.
+
+
+*) Gestion de la disponibilité des registres
+
+Pour gérer la disponibilité des registres, nous avons créé une hashmap
+qui fait correspondre à un registre une valeur booléenne:
+	- Elle vaut 'true' si le registre est libre
+	- Elle vaut 'false' si le registre est occupé
+Avec cette hashmap, nous avons créé des méthodes qui permettent de réserver et
+libérer des registres lors de l'évaluation d'expressions.
+
+
+*) Gestion des variables
+
+La gestion des variables se fait à l'aide d'une hashmap qui à chaque identifiant
+de variable (sa chaîne de caractère) associe son offset par rapport à la base de
+la pile.
+
+
+*) Gestion de la pile
+
+Pour gérer la pile, nous utilisons deux compteurs:
+	- repereOffset: gère l'allocation d'offsets pour les variables du programme
+	dans l'espace de la pile qui leur est réservé.
+	- freeWordStackOffset: gère l'allocation d'offsets pour les variables
+	temporaires.
