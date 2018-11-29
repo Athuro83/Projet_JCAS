@@ -248,6 +248,22 @@ public class CoderProg {
 			break;
 
 		case TantQue:
+			Prog.ajouter("Bloc 'Tant que'");
+			
+			/* Déclaration des étiquettes */
+			Etiq e_cond = Etiq.nouvelle("cond_TQ");
+			Etiq e_deb = Etiq.nouvelle("debut_TQ");
+			
+			/* Branchement sur la condition */
+			Prog.ajouter(Inst.creation1(Operation.BRA, Operande.creationOpEtiq(e_cond)), "Saut vers la condition de la boucle");
+			
+			/* Bloc d'instructions de la boucle */
+			Prog.ajouter(e_deb);
+			coder_LISTE_INST(a.getFils2());
+			
+			/* Bloc condition de la boucle */
+			Prog.ajouter(e_cond);
+			coder_COND(a.getFils1(), true, e_deb);
 			break;
 
 		case Si:
@@ -725,6 +741,30 @@ public class CoderProg {
 					}
 				}
 			}
+		}
+	}
+	
+	/**
+	 * CONDITION
+	 */
+	private void coder_COND(Arbre a, boolean saut, Etiq e) {
+		/* Examen du noeud */
+		switch (a.getNoeud()) {
+		
+			case Ident:
+				/* Analyse de l'identificateur */
+				switch(a.getChaine()) {
+				
+					case "true":
+						break;
+						
+					case "false":
+						break;
+				}
+				break;
+	
+			default:
+				break;
 		}
 	}
 

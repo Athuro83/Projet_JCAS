@@ -3,5 +3,9 @@ program
     i : integer;
 begin
     i := 1;
+    write("i : ", i);
+    new_line;
     i := i + 1;
+    write("i : ", i);
+    new_line;
 end.

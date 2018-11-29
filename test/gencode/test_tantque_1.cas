@@ -1,0 +1,14 @@
+-- Test d'une boucle simple avec variable de contrôle
+
+program
+    i : integer;
+begin
+    
+    while i < 2 do
+        write(i);
+        new_line;
+        i := i+1;
+    end;
+
+    write("fin");
+end.

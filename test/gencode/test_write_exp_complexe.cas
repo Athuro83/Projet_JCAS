@@ -1,0 +1,8 @@
+-- Test de l'ecriture d'une expression qui necessite l'allocation de registres
+program
+begin
+    --write("1 + 2 - 3 + 4 = ", 1 + 2 - 3 + 4);
+    --new_line;
+    write("(1 + 2) - (3 + 4) = ", (1 + 2) - (3 + 4));
+    new_line;
+end.

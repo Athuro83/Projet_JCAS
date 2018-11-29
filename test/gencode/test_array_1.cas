@@ -1,0 +1,7 @@
+-- Allocation d'un tableau
+program
+    tab: array[1 .. 10] of integer;
+    i: boolean;
+begin
+    null;
+end.
