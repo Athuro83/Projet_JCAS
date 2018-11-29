@@ -977,16 +977,27 @@ public class CoderProg {
 			return Operande.creationOpReel(a.getReel());
 
 		case Ident:
-			/* Tester si l'offset a été alloué */
-			if(!testerID(a.getChaine())) {
-				allouerOffsetID(a.getChaine(), a);
+			switch(a.getChaine()) {
+			/* Reconnaître les valeurs génériques du JCas */
+			case "true":
+				return Operande.creationOpEntier(1);
+			case "false":
+				return Operande.creationOpEntier(0);
+			case "max_int":
+				return Operande.creationOpEntier(Integer.MAX_VALUE);
+			/* Reconnaître les identificateurs du prog */
+			default:
+				/* Tester si l'offset a été alloué */
+				if(!testerID(a.getChaine())) {
+					allouerOffsetID(a.getChaine(), a);
+				}
+	
+				/* Chercher où est stocké la valeur de l'identificateur */
+				int offset = getOffset(a.getChaine());
+	
+				/* Retourner l'opérande correspondant */
+				return Operande.creationOpIndirect(offset, Registre.GB);
 			}
-			
-			/* Chercher où est stocké la valeur de l'identificateur */
-			int offset = getOffset(a.getChaine());
-
-			/* Retourner l'opérande correspondant */
-			return Operande.creationOpIndirect(offset, Registre.GB);
 
 		default:
 			return null;
