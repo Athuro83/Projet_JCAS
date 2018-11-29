@@ -608,7 +608,8 @@ public class CoderProg {
 			// On retourne l'offset correspondant a l'ID
 			return getOffset(a.getChaine());
 
-		case Index:
+		case Index: 
+			
 			break;
 
 		default:
