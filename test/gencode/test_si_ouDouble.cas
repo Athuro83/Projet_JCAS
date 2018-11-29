@@ -1,0 +1,10 @@
+-- Test la condition if avec un simple OU
+
+program
+begin
+	if (3>4) or (5=0) then
+		write("Erreur !");
+	else
+		write("Correct !");
+	end;
+end.

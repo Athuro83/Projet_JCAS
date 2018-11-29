@@ -862,29 +862,6 @@ public class CoderProg {
 		}
 	}
 	
-	/**
-	 * CONDITION
-	 */
-	private void coder_COND(Arbre a, boolean saut, Etiq e) {
-		/* Examen du noeud */
-		switch (a.getNoeud()) {
-		
-			case Ident:
-				/* Analyse de l'identificateur */
-				switch(a.getChaine()) {
-				
-					case "true":
-						break;
-						
-					case "false":
-						break;
-				}
-				break;
-	
-			default:
-				break;
-		}
-	}
 
 	/**************************************************************************
 	 * PAS

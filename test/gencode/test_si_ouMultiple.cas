@@ -1,0 +1,10 @@
+--Test la condition Si sur un OU multiple
+
+program
+begin
+	if (2=2) or (4>3) or (4/=5) or (2>=3) or (2<=5) or (7=8) or (3<3) then
+		write("Correct !");
+	else 
+		write("Erreur !");
+	end;
+end.

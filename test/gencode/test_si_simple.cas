@@ -1,0 +1,8 @@
+-- Test un IF simple sans ELSE
+
+program
+begin
+	if true then
+		write("Correct !");
+	end;
+end.
