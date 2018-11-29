@@ -4,5 +4,9 @@ program
 	x : boolean;
 begin
 	x := 3 > 4;
+	if x then
+		write("Erreur !");
+	else 
+		write("Correct !");
+	end;
 end.
-
