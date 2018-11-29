@@ -258,16 +258,8 @@ public class CoderProg {
 
 			if(a.getFils1().getNoeud().equals(Noeud.Increment)) {		
 
-				/******************************************************
-				IL FAUT REGARDER COMMENT ON A IMPLEMENTER INCREMENT ET DECREMENT DANS LA PASSE 2 
-
-				IL FAUT GERER LUTILISATION DE L'IDENTIFICATEUR DU FOR DANS LA LISTE D'INSTRUCTION 
-				 ******************************************************/
-
-
-
-
-				Etiq etiqFOR = Etiq.nouvelle("FOR") ;
+				
+				Etiq etiqFOR = Etiq.nouvelle("FOR") ; 
 				Prog.ajouter( etiqFOR, "Etiquette pour le FOR"); // FOR :
 				Prog.ajouter(Inst.creation2(Operation.STORE, Operande.opDirect(rdebut), Operande.creationOpIndirect(offset2, Registre.GB)));
 
