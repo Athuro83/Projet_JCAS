@@ -1,12 +1,21 @@
 ==[ Tests de la passe 3 ]==
 
+	Pour la rédaction de tous les tests nous avons essayé de rédiger des petits programmes qui teste un unique élément.
+	Pour faciliter la compréhension de nos tests nous avons écris une ligne au début de chaque programme pour décrire 
+ce que le test est censé tester.
+
 *) Tests de lecture / ecriture :
 
-
+	Pour tester la fonction de lecture nous avons ecris des codes qui attendent certains types d'arguments. 
+Si le type ne correspond pas a l'un des types possibles, on retourne une erreur, tout comme lorsqu'il y a un
+overflow (exemple : l'entier ecrit est trop grand).
+	Pour tester la fonction d'ecriture nous avons ecris des tests qui ecrivent des chaines de caracteres, ou des entiers
+ou des reels (Les trois types possibles d'écrire).
 
 *) Tests de l'affectation :
 
-
+	Pour tester l'affectation nous avons écris des programmes qui affecte un entier, un integer, un boolean
+mais aussi qui affecte le resultat d'une série de calculs.
 
 *) Tests des conditions : 
 
