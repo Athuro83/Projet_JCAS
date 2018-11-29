@@ -977,6 +977,11 @@ public class CoderProg {
 			return Operande.creationOpReel(a.getReel());
 
 		case Ident:
+			/* Tester si l'offset a été alloué */
+			if(!testerID(a.getChaine())) {
+				allouerOffsetID(a.getChaine(), a);
+			}
+			
 			/* Chercher où est stocké la valeur de l'identificateur */
 			int offset = getOffset(a.getChaine());
 

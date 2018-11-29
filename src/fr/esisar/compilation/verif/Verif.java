@@ -372,7 +372,7 @@ public class Verif {
 			
 			/* Vérification du contexte */
 			/* - Le type de l'expression doit être booléen */
-			if(getTypeNoeud(a.getFils2()) != Type.Boolean) {
+			if(getTypeNoeud(a.getFils1()) != Type.Boolean) {
 				/* ERREUR CONTEXTE : Condition de type non booléen */
 				//TODO : Nouvelle erreur ?
 				throw new ErreurInterneVerif("La condition n'est pas un booléen (ligne " + a.getNumLigne() + ")");
