@@ -325,14 +325,77 @@ public class CoderProg {
 	 * COND
 	 **************************************************************************/
 	private void coder_COND(Arbre a, boolean comparaison, Etiq etiquette) {
-		Registre r1=allouerRegistre();
-		Registre r2=allouerRegistre();
+		
+		Registre r1;
+		Registre r2;
+		// Entier permettant de compter le nombre de variables temporaires que l'on va devoir creer
+		int allocTemp = 0;
+		// Entier permettant de garder en memoire l'offset de la premiere variable temporaire
+		int offsetTemp1 = 0;
+		// Entier permettant de garder en memoire l'offset de la deuxieme variable temporaire
+		int offsetTemp2 = 0;
+		
+		// On teste s'il reste 1 registre de libre
+		if(resteRegistre()) {
+			r1 = allouerRegistre();
+			// On teste s'il reste un 2eme registre de libre
+			if(resteRegistre()) {
+				r2 = allouerRegistre();
+			}
+			// S'il n'y a plus de registre on alloue une variable temporaire
+			else {
+				offsetTemp1 = allouerTemp(Registre.R1);
+				allocTemp = 1;
+				r2 = Registre.R1;			
+			}
+		}
+		// S'il n'y a plus de registre on alloue 2 variables temporaires
+		else {
+			offsetTemp1 = allouerTemp(Registre.R1);
+			r1 = Registre.R1;
+			offsetTemp2 = allouerTemp(Registre.R2);
+			r2 = Registre.R2;			
+			allocTemp = 2;
+		}
 		
 		switch(a.getNoeud()) {
+		/* Pour le cas Et et Ou on cree des etiquettes pour faire les branchements selon la methode paresseuse
+		 * Une fois l'etiquette créée on évalue les différentes conditions de part et d'autre de l'operateur
+		 */
 		case Et:
+			if(comparaison) {
+				Etiq etiqFinEt = Etiq.nouvelle("E_fin");
+				
+				coder_COND(a.getFils1(), !comparaison, etiqFinEt);
+				coder_COND(a.getFils2(), comparaison, etiquette);
+				
+				Prog.ajouter(etiqFinEt);
+			}
+			else {
+				coder_COND(a.getFils1(), comparaison, etiquette);
+				coder_COND(a.getFils2(), comparaison, etiquette);
+			}
+			
 			break;
 		case Ou:
+			if(comparaison) {
+				coder_COND(a.getFils1(), comparaison, etiquette);
+				coder_COND(a.getFils2(), comparaison, etiquette);
+			}
+			else {
+				Etiq etiqFinOu = Etiq.nouvelle("E_fin");
+
+				coder_COND(a.getFils1(), !comparaison, etiqFinOu);
+				coder_COND(a.getFils2(), comparaison, etiquette);
+				
+				Prog.ajouter(etiqFinOu);
+
+			}
+			
 			break;
+		/* Pour les tests ci-dessous, on évalue les expressions de part et d'autre de l'operateur 
+		 * ensuite on fait le test de comparaison et on fait le branchement correspondant
+		 */
 		case Sup:
 			coder_EXP(a.getFils1(), r1);
 			coder_EXP(a.getFils2(), r2);
@@ -399,9 +462,63 @@ public class CoderProg {
 				Prog.ajouter(Inst.creation1(Operation.BEQ, Operande.creationOpEtiq(etiquette)));
 			}
 			break;
+		// On appelle coder_COND avec la condition et l'inverse du saut
+		case Non:
+			coder_COND(a.getFils1(), !comparaison, etiquette);	
+		/* Si l'on est sur un noeud ident on a 3 cas possibles :
+		 * Soit on est sur un noeud True ou False, soit on est sur un identifiant
+		 * Dans ce dernier cas, on va chercher la valeur de l'identifiant que l'on stocke dans R1 pour ensuite le comparer a 0
+		 * On fait enfin le branchement correspondant
+		 */
+		case Ident:
+			switch(a.getChaine()) {
+			case "true":
+				if(comparaison) {
+					Prog.ajouter(Inst.creation1(Operation.BRA, Operande.creationOpEtiq(etiquette)));
+
+				}
+				break;
+			case "false":
+				if(!comparaison) {
+					Prog.ajouter(Inst.creation1(Operation.BRA, Operande.creationOpEtiq(etiquette)));
+
+				}
+				break;
+			default:
+				Prog.ajouter(Inst.creation2(Operation.LOAD, Operande.creationOpIndirect(getOffset(a.getChaine()), Registre.GB), Operande.opDirect(r1)));
+				Prog.ajouter(Inst.creation2(Operation.CMP, Operande.creationOpEntier(0), Operande.opDirect(r1)));
+
+				if(comparaison) {
+					Prog.ajouter(Inst.creation1(Operation.BNE, Operande.creationOpEtiq(etiquette)));
+				}
+				else {
+					Prog.ajouter(Inst.creation1(Operation.BEQ, Operande.creationOpEtiq(etiquette)));
+				}
+				break;
+			}
+		default:
+			break;
 		}
-		libererRegistre(r1);
-		libererRegistre(r2);
+		/* On libere les registres alloués ou les variables temporaires allouées
+		 * Pour cela on switch sur le nombre d'allocations temporaires
+		 */
+		switch(allocTemp) {
+			case 0:
+				libererRegistre(r1);
+				libererRegistre(r2);
+				break;
+			case 1:
+				Prog.ajouter(Inst.creation2(Operation.LOAD, Operande.creationOpIndirect(offsetTemp1, Registre.GB), Operande.R1));
+				libererTemp();
+				libererRegistre(r1);
+				break;
+			case 2:
+				Prog.ajouter(Inst.creation2(Operation.LOAD, Operande.creationOpIndirect(offsetTemp2, Registre.GB), Operande.R2));
+				Prog.ajouter(Inst.creation2(Operation.LOAD, Operande.creationOpIndirect(offsetTemp1, Registre.GB), Operande.R1));
+				libererTemp();
+				libererTemp();		
+				break;
+		}
 	}
 	
 	/**************************************************************************
