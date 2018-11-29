@@ -921,11 +921,20 @@ public class CoderProg {
 			return Operande.creationOpReel(a.getReel());
 
 		case Ident:
+			switch(a.getChaine()) {
+			case "true":
+				return Operande.creationOpEntier(1);
+			case "false":
+				return Operande.creationOpEntier(0);
+			case "max_int":
+				return Operande.creationOpEntier(Integer.MAX_VALUE);
+			default:
 			/* Chercher où est stocké la valeur de l'identificateur */
 			int offset = getOffset(a.getChaine());
 
 			/* Retourner l'opérande correspondant */
 			return Operande.creationOpIndirect(offset, Registre.GB);
+			}
 
 		default:
 			return null;
