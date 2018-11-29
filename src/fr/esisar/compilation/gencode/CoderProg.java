@@ -232,15 +232,75 @@ public class CoderProg {
 			break;
 
 		case Affect:
-			// On teste s'il reste des registres, normalement il y en a toujours
+			Registre r1;
+			Registre r2 = null;
+			int offset_tmp1 = 0,
+				offset_tmp2 = 0;
+			int nb_tmp = 0;
+			int offset;
+			
+			/* On tente de réserver un registre */
 			if(resteRegistre())
 			{
-				Registre r = allouerRegistre();
-				coder_EXP(a.getFils2(), r);
-				// On recupere l'offset de notre ID (ou on le cree s'il n'existe pas encore)
-				int offset = coder_PLACE(a.getFils1());
-				Prog.ajouter(Inst.creation2(Operation.STORE, Operande.opDirect(r), Operande.creationOpIndirect(offset, Registre.GB)), "Affectation ligne "+a.getNumLigne());
-				libererRegistre(r);
+				r1 = allouerRegistre();
+			}
+			else {
+				offset_tmp1 = allouerTemp(Registre.R0);
+				r1 = Registre.R0;
+				nb_tmp += 1;
+			}
+			
+			/* On évalue notre expression dans r1 */
+			coder_EXP(a.getFils2(), r1);
+			
+			/* On étudie notre fils gauche */
+			switch (a.getFils1().getNoeud()) {
+				/* Cas d'un identificateur simple */
+				case Ident:
+					// On recupere l'offset de notre ID (ou on le cree s'il n'existe pas encore)
+					offset = coder_PLACE(a.getFils1(), null);
+					Prog.ajouter(Inst.creation2(Operation.STORE, Operande.opDirect(r1), Operande.creationOpIndirect(offset, Registre.GB)), "Affectation ligne "+a.getNumLigne());
+					break;
+	
+				case Index:
+					/* On alloue un second registre pour calculer l'index */
+					if(resteRegistre()) {
+						r2 = allouerRegistre();
+					}
+					else {
+						offset_tmp2 = allouerTemp(Registre.R1);
+						r2 = Registre.R1;
+						nb_tmp += 1;
+					}
+					/* Calcul de l'offset et de l'index */
+					offset = coder_PLACE(a.getFils1(), r2);
+					Prog.ajouter(Inst.creation2(Operation.STORE, Operande.opDirect(r1), Operande.creationOpIndexe(offset, Registre.GB, r2)));
+					break;
+			}
+			
+			switch(nb_tmp) {
+			
+				case 0:
+					/* Libérer les 2 registres */
+					libererRegistre(r1);
+					if(r2 != null) libererRegistre(r2);
+					break;
+
+				case 1:
+					/* On a réussi à allouer r1 */
+					libererRegistre(r1);
+					/* Il faut rétablir r2 */
+					Prog.ajouter(Inst.creation2(Operation.LOAD, Operande.creationOpIndirect(offset_tmp2, Registre.GB), Operande.opDirect(r2)));
+					libererTemp();
+					break;
+					
+				case 2:
+					/* Il faut rétablir r1 et r2 */
+					Prog.ajouter(Inst.creation2(Operation.LOAD, Operande.creationOpIndirect(offset_tmp1, Registre.GB), Operande.opDirect(r1)));
+					libererTemp();
+					Prog.ajouter(Inst.creation2(Operation.LOAD, Operande.creationOpIndirect(offset_tmp2, Registre.GB), Operande.opDirect(r2)));
+					libererTemp();
+					break;
 			}
 			break;
 
@@ -253,7 +313,7 @@ public class CoderProg {
 			coder_EXP(a.getFils1().getFils3(), rfin);
 
 
-			int offset2 = coder_PLACE(a.getFils1().getFils1());
+			int offset2 = coder_PLACE(a.getFils1().getFils1(), null);
 
 
 			if(a.getFils1().getNoeud().equals(Noeud.Increment)) {		
@@ -350,7 +410,7 @@ public class CoderProg {
 		case Lecture:
 			// On teste s'il reste des registres, normalement il y en a toujours
 
-			int offset = coder_PLACE(a.getFils1());
+			offset = coder_PLACE(a.getFils1(), null);
 
 			Decor dec;
 			if( (dec = a.getFils1().getDecor()) == null ) {
@@ -596,8 +656,9 @@ public class CoderProg {
 	
 	/**************************************************************************
 	 * PLACE
+	 * @param r TODO
 	 **************************************************************************/
-	private int coder_PLACE(Arbre a)  {
+	private int coder_PLACE(Arbre a, Registre r)  {
 		switch(a.getNoeud()) {
 
 		case Ident:
@@ -609,7 +670,10 @@ public class CoderProg {
 			return getOffset(a.getChaine());
 
 		case Index:
-			break;
+			/* On calcule l'index dans r */
+			coder_EXP(a.getFils2(), r);
+			/* On renvoie l'offset du début du tableau */
+			return coder_PLACE(a.getFils1(), r);
 
 		default:
 			break;
@@ -656,6 +720,12 @@ public class CoderProg {
 	 * Affiche à l'écran l'expression
 	 */
 	private void afficher_EXP(Arbre a) {
+		/* Variables */
+		Registre r;
+		Decor dec;
+		int offset;
+		boolean R1_save = false;
+		
 		switch(a.getNoeud()) {
 
 		case Entier:
@@ -689,22 +759,26 @@ public class CoderProg {
 				throw new ErreurInst("L'affichage n'est pas possible pour ce type.");
 			}						
 			break;
-
-		default:
-			/* Expressions qui demandent un calcul avant affichage */
-			Prog.ajouter("Calcul de l'expression avant affichage");
-
-			/* Calculer l'expression */
-			Registre r = allouerRegistre();
-			coder_EXP(a, r);
-
-			/* Charger la valeur dans le registre d'affichage */
+			
+		case Index:
+			/* Récupérer l'adresse du tableau */
+			offset = coder_PLACE(a.getFils1(), null);
+			
+			/* Calculer l'index */
+			r = allouerRegistre();
+			coder_EXP(a.getFils2(), r);
+			
+			/* Sauvegarder la valeur de R1 si nécessaire */
 			if(r != Registre.R1) {
-				Prog.ajouter(Inst.creation2(Operation.LOAD, Operande.opDirect(r), Operande.opDirect(Registre.R1)));
+				testerPile(1);
+				Prog.ajouter(Inst.creation1(Operation.PUSH, Operande.R1), "Sauvegarde de la valeur de R1");
+				R1_save = true;
 			}
-
+			/* Charger la valeur à afficher dans R1 */
+			Prog.ajouter(Inst.creation2(Operation.LOAD, Operande.creationOpIndexe(offset, Registre.GB, r), Operande.opDirect(Registre.R1)));
+			
 			/* Afficher correctement l'expression */
-			Decor dec = a.getDecor();
+			dec = a.getDecor();
 			if(dec.getType() == Type.Integer) {
 				Prog.ajouter(Inst.creation0(Operation.WINT));
 			}
@@ -712,7 +786,48 @@ public class CoderProg {
 				Prog.ajouter(Inst.creation0(Operation.WFLOAT));
 			}
 
-			/* Libérer le registre R1 */
+			/* Rétablir la valeur de R1 si nécessaire */
+			if(R1_save) {
+				Prog.ajouter(Inst.creation1(Operation.POP, Operande.R1), "Rétablir la valeur de R1");
+			}
+			/* Libérer le registre */
+			libererRegistre(r);
+
+			break;
+
+		default:
+			/* Expressions qui demandent un calcul avant affichage */
+			Prog.ajouter("Calcul de l'expression avant affichage");
+
+			/* Calculer l'expression */
+			r = allouerRegistre();
+			coder_EXP(a, r);
+
+			/* Charger la valeur dans le registre d'affichage */
+			if(r != Registre.R1) {
+				/* Sauvegarder le contenu de R1 dans la pile */
+				testerPile(1);
+				Prog.ajouter(Inst.creation1(Operation.PUSH, Operande.R1), "Sauvegarde de R1");
+				R1_save = true;
+				/* Charger la valeur à afficher dans R1 */
+				Prog.ajouter(Inst.creation2(Operation.LOAD, Operande.opDirect(r), Operande.opDirect(Registre.R1)), "Charger la valeur de " + r + " dans le registre d'affichage R1");
+			}
+
+			/* Afficher correctement l'expression */
+			dec = a.getDecor();
+			if(dec.getType() == Type.Integer) {
+				Prog.ajouter(Inst.creation0(Operation.WINT));
+			}
+			else {
+				Prog.ajouter(Inst.creation0(Operation.WFLOAT));
+			}
+
+			/* Rétablir la valeur de R1 si besoin */
+			if(R1_save) {
+				Prog.ajouter(Inst.creation1(Operation.POP, Operande.R1), "Rétablir la valeur de R1");
+			}
+			
+			/* Libérer le registre */
 			libererRegistre(r);
 		}
 	}
@@ -876,7 +991,7 @@ public class CoderProg {
 					coder_TEST_ADD_OV();
 				}
 				else {
-					Prog.ajouter("Cas compliqué : Alloc d'un registre");
+					Prog.ajouter("Cas compliqué : Allocation d'un registre");
 					/* Il nous faut un registre supplémentaire ! */
 					if(resteRegistre()) {
 						Prog.ajouter("Il reste des registres : évaluation gauche -> droite");
@@ -897,7 +1012,6 @@ public class CoderProg {
 					}
 					else {
 						Prog.ajouter("Il ne reste plus de registres, évaluation droite -> gauche");
-						//TODO : Affect temporaire
 						/* Evaluer l'expression de gauche */
 						coder_EXP(a.getFils2(), r);
 
@@ -977,27 +1091,16 @@ public class CoderProg {
 			return Operande.creationOpReel(a.getReel());
 
 		case Ident:
-			switch(a.getChaine()) {
-			/* Reconnaître les valeurs génériques du JCas */
-			case "true":
-				return Operande.creationOpEntier(1);
-			case "false":
-				return Operande.creationOpEntier(0);
-			case "max_int":
-				return Operande.creationOpEntier(Integer.MAX_VALUE);
-			/* Reconnaître les identificateurs du prog */
-			default:
-				/* Tester si l'offset a été alloué */
-				if(!testerID(a.getChaine())) {
-					allouerOffsetID(a.getChaine(), a);
-				}
-	
-				/* Chercher où est stocké la valeur de l'identificateur */
-				int offset = getOffset(a.getChaine());
-	
-				/* Retourner l'opérande correspondant */
-				return Operande.creationOpIndirect(offset, Registre.GB);
+			/* Tester si l'offset a été alloué */
+			if(!testerID(a.getChaine())) {
+				allouerOffsetID(a.getChaine(), a);
 			}
+			
+			/* Chercher où est stocké la valeur de l'identificateur */
+			int offset = getOffset(a.getChaine());
+
+			/* Retourner l'opérande correspondant */
+			return Operande.creationOpIndirect(offset, Registre.GB);
 
 		default:
 			return null;
