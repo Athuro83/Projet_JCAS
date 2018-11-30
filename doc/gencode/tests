@@ -34,7 +34,10 @@ ou bien composées avec des AND ou des OR.
 
 *) Tests de la boucle Tantque : 
 
+	On teste des boucles TantQue simples, des boucles TantQue pour initialiser des tableaux et des boucles
+	TantQue imbriquées.
 
+*) Tests des tableaux :
 
-*) Tests des affectations de tableaux :
-
+L'affectation et l'affichage des éléments d'un tableau à 1 dimension est testée.
+Les tableaux de plus de 1 dimension ne sont pas supportés 
