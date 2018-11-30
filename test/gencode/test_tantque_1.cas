@@ -1,4 +1,4 @@
--- Test d'une boucle simple avec variable de contrôle
+-- Test d'une boucle simple avec variable de controle
 
 program
     i : integer;

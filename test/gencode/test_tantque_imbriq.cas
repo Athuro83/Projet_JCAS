@@ -1,15 +1,15 @@
--- Test d'une boucle TantQue imbriquée dans une boucle TantQue
+-- Test d'une boucle TantQue imbriquee dans une boucle TantQue
 
 program
-    i : integer
-    j : integer
+    i : integer;
+    j : integer;
 begin
     i := 0;
     j := 0;
 
     while i < 5 do
         while j < 5 do
-            write(i, " + , j, " = ", i+j);
+            write(i, " + ", j, " = ", i+j);
             new_line;
 
             i := i+1;
