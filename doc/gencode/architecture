@@ -32,3 +32,10 @@ Pour gérer la pile, nous utilisons deux compteurs:
 	dans l'espace de la pile qui leur est réservé.
 	- freeWordStackOffset: gère l'allocation d'offsets pour les variables
 	temporaires.
+	
+
+*) Gestion des tableaux
+
+Nous gérons dans notre projet les tableaux à 1 dimension, quel que soit leur indice
+de départ.
+Les tableaux de dimension supérieure ne sont pas gérés.

@@ -1,0 +1,18 @@
+-- Suite de Fibonacci
+
+program
+    i : integer;
+    tab : array[0 .. 9] of integer;
+begin
+    i := 2;
+    tab[0] := 0;
+    tab[1] := 1;
+
+    while i < 10 do
+        tab[i] := tab[i-1] + tab[i-2];
+        write("Init de l'indice ", i, " : ", tab[i]);
+        new_line;
+        i := i + 1;
+    end;
+    write("fin");
+end.

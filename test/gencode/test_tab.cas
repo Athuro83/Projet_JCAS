@@ -1,0 +1,12 @@
+program
+    tab : array[1 .. 2] of integer;
+    i : integer;
+begin
+    tab[1] := 2;
+    write(tab[1]);
+    new_line;
+
+    i := 2;
+    tab[i] := 4;
+    write(tab[2]);
+end.

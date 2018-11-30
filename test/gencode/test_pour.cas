@@ -1,0 +1,9 @@
+program
+    i : integer;
+begin
+    for i := 1 to 5 do
+        write("i : ", i);
+        new_line;
+    end;
+    write("fin i : ", i);
+end.
