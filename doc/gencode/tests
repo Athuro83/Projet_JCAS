@@ -29,7 +29,8 @@ ou bien composées avec des AND ou des OR.
 
 *) Tests de la boucle pour : 
 
-	
+	Pour tester la boucle pour, nous avons tester les differents cas possibles qu'on pouvait avoir sur les bornes de l'intervalle de la boucle for.
+	Nous avons testé les entiers positifs, négatifs, les intervalles vides. Nous avons tester les cas des for incrementale et decrementale.  
 
 *) Tests de la boucle Tantque : 
 
