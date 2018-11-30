@@ -1,0 +1,5 @@
+-- Test de l'affichage d'une expression
+program
+begin
+    write("test: ", 1 + 1);
+end.

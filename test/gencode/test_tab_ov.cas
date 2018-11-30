@@ -1,0 +1,7 @@
+-- Test d'un debordement de tableau
+
+program
+    tab : array[1..10] of integer;
+begin
+    tab[0] := 1;
+end.

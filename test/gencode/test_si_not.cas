@@ -1,0 +1,10 @@
+-- Test le cas d'un NOT sur une condition d'un IF
+
+program
+begin
+	if not(true) then
+		write("Erreur !");
+	else 
+		write("Correct !");
+	end;
+end.

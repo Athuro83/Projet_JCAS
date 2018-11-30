@@ -1,0 +1,12 @@
+-- Test la condition du si sur un boolean qui vient d'etre affecte a false
+
+program
+	b : boolean;
+begin
+	b := 3=4;
+	if b then
+		write("Erreur !");
+	else
+		write("Correct !");
+	end;
+end.

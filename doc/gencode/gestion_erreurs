@@ -1,0 +1,23 @@
+==[ Messages d'erreurs de la passe 3 ]==
+
+
+*) Messages de la machine abstraite:
+
+Dans le code généré, on teste:
+
+	- La place qu'il reste en pile lorsque l'on fait des allocations.
+	En cas de débordement de pile, le programme s'arrête proprement avec le message:
+	"ERREUR : Limite de pile depassee"
+	
+	- Si il y a un débordement après une opération arithmétique.
+	En cas de débordement, le programme s'arrête proprement avec le message:
+	"ERREUR : Overflow apres operation arithmetique"
+	
+	- Si il y a une erreur après la lecture d'une valeur.
+	En cas d'erreur, le programme s'arrête proprement avec le message:
+	"ERREUR : Overflow apres une lecture"
+	
+	- Si il y a un débordement d'index.
+	En cas d'index en dehors des bornes autorisées, le programme s'arrête
+	proprement avec le message:
+	"ERREUR : Index en dehors des limites du tableau"

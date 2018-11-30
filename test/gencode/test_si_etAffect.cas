@@ -1,0 +1,14 @@
+-- Test la boucle if avec un ET sur des booleens affectes
+
+program
+	b1 : boolean;
+	b2 : boolean;
+begin
+	b1 := 3<4;
+	b2 := 2=2;
+	if b1 and b2 then
+		write("Correct !");
+	else 
+		write("Erreur !");
+	end;
+end.

@@ -1,0 +1,12 @@
+-- Test de l'affichage des 4 expressions '+', '-', '*' et '/'
+program
+begin
+    write("1 + 1: ", 1 + 1);
+    new_line;
+    -- Soustraction a debug
+    write("2 - 1: ", 2 - 1);
+    new_line;
+    write("2 * 4: ", 2 * 4);
+    new_line;
+    write("4 / 2: ", 4 / 2);
+end.

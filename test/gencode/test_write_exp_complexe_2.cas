@@ -1,0 +1,6 @@
+-- Test de l'ecriture d'une expression qui necessite l'allocation de plusieurs registres
+program
+begin
+    write("1 + ((2 + 2) + (3 + 3)) = ", 1 + ((2 + 2) + (3 + 3)));
+    new_line;
+end.

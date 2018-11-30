@@ -1,0 +1,6 @@
+-- Test la traduction d'un noeud conversion
+program
+begin
+    write("1 + 2.0 = ", 1 + 2.0);
+    new_line;
+end.

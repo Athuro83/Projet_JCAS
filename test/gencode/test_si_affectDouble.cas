@@ -1,0 +1,12 @@
+-- Test la condition du si sur une double condition avec un Et 
+
+program
+	b : boolean;
+begin
+	b := 3<4;
+	if b and (5=5) then
+		write("Correct !");
+	else
+		write("Erreur !");
+	end;
+end.

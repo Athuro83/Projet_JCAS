@@ -1,0 +1,8 @@
+-- Test l'affectation d'un boolean a partir d'un test inferieur ou egal
+
+program
+	x : boolean;
+begin
+	x := 3 <= 3;
+end.
+

@@ -1,0 +1,8 @@
+program 
+	x,y : integer;
+begin
+	x := 3;
+	y := x-1;
+	write("y = ", y);
+	new_line;
+end.

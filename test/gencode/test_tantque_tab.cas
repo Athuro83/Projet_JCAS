@@ -1,0 +1,15 @@
+-- Utilisation d'une boucle TantQue pour initialiser un tableau
+
+program
+    i : integer;
+    tab : array[0 .. 9] of integer;
+begin
+    i := 0;
+    while i < 10 do
+        tab[i] := 0;
+        write("Init de l'indice ", i, " : ", tab[i]);
+        new_line;
+        i := i + 1;
+    end;
+    write("fin");
+end.

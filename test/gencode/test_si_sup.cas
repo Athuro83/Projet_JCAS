@@ -1,0 +1,14 @@
+-- Test la boucle if sur le controle d'une superiorite 
+
+program 
+	x : integer;
+begin
+	x := 0;
+	if x > 4 then
+		x := x+1;
+	else
+		x := x-1;
+	end;
+	write("x = ",x);
+end.
+		
