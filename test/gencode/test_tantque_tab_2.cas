@@ -1,12 +1,13 @@
 -- Utilisation d'une boucle TantQue pour initialiser un tableau
+-- de reels
 
 program
     i : integer;
-    tab : array[0 .. 9] of integer;
+    tab : array[0 .. 9] of real;
 begin
     i := 0;
     while i < 10 do
-        tab[i] := 0;
+        tab[i] := 0.0 + i;
         write("Init de l'indice ", i, " : ", tab[i]);
         new_line;
         i := i + 1;
