@@ -1,10 +1,21 @@
 package fr.esisar.compilation.gencode;
 
 import java.util.HashMap;
-import java.util.Map;
 
-import fr.esisar.compilation.global.src.*;
-import fr.esisar.compilation.global.src3.*;
+import fr.esisar.compilation.global.src.Arbre;
+import fr.esisar.compilation.global.src.Decor;
+import fr.esisar.compilation.global.src.Defn;
+import fr.esisar.compilation.global.src.NatureType;
+import fr.esisar.compilation.global.src.Noeud;
+import fr.esisar.compilation.global.src.Type;
+import fr.esisar.compilation.global.src3.ErreurInst;
+import fr.esisar.compilation.global.src3.ErreurOperande;
+import fr.esisar.compilation.global.src3.Etiq;
+import fr.esisar.compilation.global.src3.Inst;
+import fr.esisar.compilation.global.src3.Operande;
+import fr.esisar.compilation.global.src3.Operation;
+import fr.esisar.compilation.global.src3.Prog;
+import fr.esisar.compilation.global.src3.Registre;
 
 public class CoderProg {
 
@@ -58,6 +69,7 @@ public class CoderProg {
 		coder_ERR_STACK_OV();
 		coder_ERR_ADD_OV();
 		coder_ERR_READ_OV();
+		coder_ERR_INDEX_OV();
 	}
 
 
@@ -656,7 +668,6 @@ public class CoderProg {
 	
 	/**************************************************************************
 	 * PLACE
-	 * @param r TODO
 	 **************************************************************************/
 	private int coder_PLACE(Arbre a, Registre r)  {
 		switch(a.getNoeud()) {
@@ -672,6 +683,11 @@ public class CoderProg {
 		case Index:
 			/* On calcule l'index dans r */
 			coder_EXP(a.getFils2(), r);
+			/* Tester un débordement d'index */
+			Type t_inter = getArrayInterval(a.getFils1());
+			testerIndex(r, t_inter);
+			/* Calculer l'adresse de la valeur */
+			Prog.ajouter(Inst.creation2(Operation.SUB, Operande.creationOpEntier(t_inter.getBorneInf()), Operande.opDirect(r)), "Décallage de " + t_inter.getBorneInf() + " pour obtenir l'adresse");
 			/* On renvoie l'offset du début du tableau */
 			return coder_PLACE(a.getFils1(), r);
 
@@ -1057,8 +1073,32 @@ public class CoderProg {
 		Prog.ajouter(Inst.creation1(Operation.TSTO, Operande.creationOpEntier(mem_size)), "Test de la pile pour " + mem_size + " case(s) mémoire");
 		Prog.ajouter(Inst.creation1(Operation.BOV, Operande.creationOpEtiq(Etiq.lEtiq("ERR_STACK_OV"))));
 	}
+	
+	/* Détecte si un index dépasse les limites de son tableau */
+	private void testerIndex(Registre r_index, Type t_intervalle) {
+		Prog.ajouter("Test de débordement d'index");
+		/* Test de la borne inf */
+		Prog.ajouter(Inst.creation2(Operation.CMP, Operande.creationOpEntier(t_intervalle.getBorneInf()), Operande.opDirect(r_index)), "Test de la borne inf : " + t_intervalle.getBorneInf());
+		Prog.ajouter(Inst.creation1(Operation.BLT, Operande.creationOpEtiq(Etiq.lEtiq("ERR_INDEX_OV"))));
+		/* Test de la borne sup */
+		Prog.ajouter(Inst.creation2(Operation.CMP, Operande.creationOpEntier(t_intervalle.getBorneSup()), Operande.opDirect(r_index)), "Test de la borne sup : " + t_intervalle.getBorneSup());
+		Prog.ajouter(Inst.creation1(Operation.BGT, Operande.creationOpEtiq(Etiq.lEtiq("ERR_INDEX_OV"))));
 
-	// Fonctions utilitaires 
+	}
+
+	// Fonctions utilitaires
+	
+	private Type getArrayInterval(Arbre a) throws RuntimeException {
+		
+		/* On vérifie que l'on a bien un tableau */
+		Type t = a.getDecor().getType();
+		if(t.getNature() != NatureType.Array) {
+			throw new RuntimeException("Pas un tableau !");
+		}
+		
+		/* On récupère et renvoie l'intervalle */
+		return t.getIndice();
+	}
 
 	private Operande generateOperande(Arbre a) {
 		switch (a.getNoeud()) {
@@ -1086,6 +1126,7 @@ public class CoderProg {
 		}
 	}
 
+	// Cette fonction détermine si un noeud de l'arbre est ou non une feuille
 	private boolean isLeaf(Arbre a) {
 		return a.getArite() == 0;
 	}
@@ -1175,21 +1216,27 @@ public class CoderProg {
 	private void coder_ERR_STACK_OV() {
 
 		Prog.ajouter(Etiq.lEtiq("ERR_STACK_OV"), "Erreur : Dépassement de la capacité de la pile");
-		Prog.ajouter(Inst.creation1(Operation.WSTR, Operande.creationOpChaine("Limite de pile depassee")));
+		Prog.ajouter(Inst.creation1(Operation.WSTR, Operande.creationOpChaine("ERREUR : Limite de pile depassee")));
 		Prog.ajouter(Inst.creation0(Operation.HALT));
 	}
 
 	private void coder_ERR_ADD_OV() {
 
 		Prog.ajouter(Etiq.lEtiq("ERR_ADD_OV"), "Erreur : Dépassement après opération arithmétique");
-		Prog.ajouter(Inst.creation1(Operation.WSTR, Operande.creationOpChaine("Overflow apres operation arithmetique")));
+		Prog.ajouter(Inst.creation1(Operation.WSTR, Operande.creationOpChaine("ERREUR : Overflow apres operation arithmetique")));
 		Prog.ajouter(Inst.creation0(Operation.HALT));
 	}
 
 	private void coder_ERR_READ_OV() {
 
 		Prog.ajouter(Etiq.lEtiq("ERR_READ_OV"), "Erreur : Dépassement après une lecture");
-		Prog.ajouter(Inst.creation1(Operation.WSTR, Operande.creationOpChaine("Overflow apres une lecture")));
+		Prog.ajouter(Inst.creation1(Operation.WSTR, Operande.creationOpChaine("ERREUR : Overflow apres une lecture")));
+		Prog.ajouter(Inst.creation0(Operation.HALT));
+	}
+	
+	private void coder_ERR_INDEX_OV( ) {
+		Prog.ajouter(Etiq.lEtiq("ERR_INDEX_OV"), "Erreur : Index hors des limites du tableau");
+		Prog.ajouter(Inst.creation1(Operation.WSTR, Operande.creationOpChaine("ERREUR : Index en dehors des limites du tableau")));
 		Prog.ajouter(Inst.creation0(Operation.HALT));
 	}
 }
