@@ -238,13 +238,17 @@ public class CoderProg {
 	 * INST
 	 **************************************************************************/
 	private void coder_INST(Arbre a)  {
+		Operande op;
+		Registre r;
+		int offset_tmp = 0;
+		boolean affect_tmp = false;
+		
 		switch(a.getNoeud()) {
 
 		case Nop:
 			break;
 
 		case Affect:
-			Registre r1;
 			Registre r2 = null;
 			int offset_tmp1 = 0,
 				offset_tmp2 = 0;
@@ -252,55 +256,35 @@ public class CoderProg {
 			int offset;
 			
 			/* On tente de réserver un registre */
-			if(resteRegistre())
-			{
-				r1 = allouerRegistre();
+			if(resteRegistre())	{
+				r = allouerRegistre();
 			}
 			else {
-				offset_tmp1 = allouerTemp(Registre.R0);
-				r1 = Registre.R0;
-				nb_tmp += 1;
+				r = Registre.R0;
+				offset_tmp = allouerTemp(r);
+				affect_tmp = true;
 			}
 			
 			/* On évalue notre expression dans r1 */
-			coder_EXP(a.getFils2(), r1);
+			coder_EXP(a.getFils2(), r);
 			
-			/* On étudie notre fils gauche */
-			switch (a.getFils1().getNoeud()) {
-				/* Cas d'un identificateur simple */
-				case Ident:
-					// On recupere l'offset de notre ID (ou on le cree s'il n'existe pas encore)
-					offset = coder_PLACE(a.getFils1(), null);
-					Prog.ajouter(Inst.creation2(Operation.STORE, Operande.opDirect(r1), Operande.creationOpIndirect(offset, Registre.GB)), "Affectation ligne "+a.getNumLigne());
-					break;
-	
-				case Index:
-					/* On alloue un second registre pour calculer l'index */
-					if(resteRegistre()) {
-						r2 = allouerRegistre();
-					}
-					else {
-						offset_tmp2 = allouerTemp(Registre.R1);
-						r2 = Registre.R1;
-						nb_tmp += 1;
-					}
-					/* Calcul de l'offset et de l'index */
-					offset = coder_PLACE(a.getFils1(), r2);
-					Prog.ajouter(Inst.creation2(Operation.STORE, Operande.opDirect(r1), Operande.creationOpIndexe(offset, Registre.GB, r2)));
-					break;
-			}
+			/* On récupère l'opérande de notre ident */
+			op = coder_PLACE(a.getFils1());
+			
+			/* Charger la valeur dans la pile */
+			Prog.ajouter(Inst.creation2(Operation.STORE, Operande.opDirect(r), op));
 			
 			switch(nb_tmp) {
 			
 				case 0:
 					/* Libérer les 2 registres */
-					libererRegistre(r1);
+					libererRegistre(r);
 					if(r2 != null) libererRegistre(r2);
 					break;
 
 				case 1:
 					/* On a réussi à allouer r1 */
-					libererRegistre(r1);
+					libererRegistre(r);
 					/* Il faut rétablir r2 */
 					Prog.ajouter(Inst.creation2(Operation.LOAD, Operande.creationOpIndirect(offset_tmp2, Registre.GB), Operande.opDirect(r2)));
 					libererTemp();
@@ -308,7 +292,7 @@ public class CoderProg {
 					
 				case 2:
 					/* Il faut rétablir r1 et r2 */
-					Prog.ajouter(Inst.creation2(Operation.LOAD, Operande.creationOpIndirect(offset_tmp1, Registre.GB), Operande.opDirect(r1)));
+					Prog.ajouter(Inst.creation2(Operation.LOAD, Operande.creationOpIndirect(offset_tmp1, Registre.GB), Operande.opDirect(r)));
 					libererTemp();
 					Prog.ajouter(Inst.creation2(Operation.LOAD, Operande.creationOpIndirect(offset_tmp2, Registre.GB), Operande.opDirect(r2)));
 					libererTemp();
@@ -317,57 +301,61 @@ public class CoderProg {
 			break;
 
 		case Pour:
-			//	Registre r = allouerRegistre();
+			/* Déclaration des étiquettes */
+			Etiq etiqFOR = Etiq.nouvelle("FOR") ; 
+			Etiq etiqCOND = Etiq.nouvelle("FOR_COND") ; 
+
 			Registre rdebut = allouerRegistre();
 			Registre rfin = allouerRegistre();
 
+			/* Calcul des bornes */
 			coder_EXP(a.getFils1().getFils2(), rdebut);
 			coder_EXP(a.getFils1().getFils3(), rfin);
 
+			/* Récupération de l'identificateur de boucle */
+			op = coder_PLACE(a.getFils1().getFils1());
 
-			int offset2 = coder_PLACE(a.getFils1().getFils1(), null);
+			/* Début de la boucle */
+			Prog.ajouter(Inst.creation1(Operation.BRA, Operande.creationOpEtiq(etiqCOND)));
+			Prog.ajouter(etiqFOR, "Etiquette pour le début du POUR"); // FOR :
 
-
+			/* Les instructions de la boucle */
+			coder_LISTE_INST(a.getFils2());
+			
+			/* Evaluer le type de la boucle (Inc. ou Dec.) */
 			if(a.getFils1().getNoeud().equals(Noeud.Increment)) {		
-
 				
-				Etiq etiqFOR = Etiq.nouvelle("FOR") ; 
-				Prog.ajouter( etiqFOR, "Etiquette pour le FOR"); // FOR :
-				Prog.ajouter(Inst.creation2(Operation.STORE, Operande.opDirect(rdebut), Operande.creationOpIndirect(offset2, Registre.GB)));
-
-				Prog.ajouter(Inst.creation2(Operation.CMP, Operande.opDirect(rfin), Operande.opDirect(rdebut)), "Comparer le registre et le 10"); // CMP R, 10 
-
-				Etiq etiqEXIT = Etiq.nouvelle("EXIT") ; 
-				Prog.ajouter(Inst.creation1(Operation.BGT, Operande.creationOpEtiq(etiqEXIT))); // Branch vers Exit si R>10 
+				/* Incrémentation du compteur */
 				Prog.ajouter(Inst.creation2(Operation.ADD, Operande.creationOpEntier(1), Operande.opDirect(rdebut))); // ADD R , 1
 				coder_TEST_ADD_OV();
+
+				/* Etiquette condition */
+				Prog.ajouter(etiqCOND, "Bloc condition du POUR");
+				
+				/* Sauvegarde de la valeur dans l'identificateur de boucle */
+				Prog.ajouter(Inst.creation2(Operation.STORE, Operande.opDirect(rdebut), op));
+
+				/* Comparaison et saut */
+				Prog.ajouter(Inst.creation2(Operation.CMP, Operande.opDirect(rfin), Operande.opDirect(rdebut)), "Test de la condition de la boucle incrémentale");
+				Prog.ajouter(Inst.creation1(Operation.BLT, Operande.creationOpEtiq(etiqFOR)), "Branchement vers le début de la boucle"); // B
 				coder_LISTE_INST(a.getFils2()); // coder la liste d'instruction
-
-				Prog.ajouter(Inst.creation1(Operation.BRA, Operande.creationOpEtiq(etiqFOR))); // Branch vers For
-
-				Prog.ajouter( etiqEXIT, " L'etiquette de la fin du POUR") ; // EXIT : 
-
-
 
 			}else if(a.getFils1().getNoeud().equals(Noeud.Decrement)) {
 
-
-				Etiq etiqFOR = Etiq.nouvelle("FOR") ;
-				Prog.ajouter( etiqFOR, "Etiquette pour le FOR"); // FOR :
-				Prog.ajouter(Inst.creation2(Operation.STORE, Operande.opDirect(rdebut), Operande.creationOpIndirect(offset2, Registre.GB)));
-
-
-				Prog.ajouter(Inst.creation2(Operation.CMP, Operande.opDirect(rfin), Operande.opDirect(rdebut)), "Comparer le registre et le 10"); // CMP R, 10 
-
-				Etiq etiqEXIT = Etiq.nouvelle("EXIT") ; 
-				Prog.ajouter(Inst.creation1(Operation.BLT, Operande.creationOpEtiq(etiqEXIT))); // Branch vers Exit si R<10 
+				/* Décrémentation du compteur */
 				Prog.ajouter(Inst.creation2(Operation.SUB, Operande.creationOpEntier(1), Operande.opDirect(rdebut))); // ADD R , 1
 				coder_TEST_ADD_OV();
+
+				/* Etiquette condition */
+				Prog.ajouter(etiqCOND, "Bloc condition du POUR");
+
+				/* Sauvegarde de la valeur dans l'identificateur de boucle */
+				Prog.ajouter(Inst.creation2(Operation.STORE, Operande.opDirect(rdebut), op));
+
+				/* Comparaison et saut */
+				Prog.ajouter(Inst.creation2(Operation.CMP, Operande.opDirect(rfin), Operande.opDirect(rdebut)), "Test de la condition de la boucle décrémentale");
+				Prog.ajouter(Inst.creation1(Operation.BGT, Operande.creationOpEtiq(etiqFOR)), "Branchement vers le début de la boucle"); // B
 				coder_LISTE_INST(a.getFils2()); // coder la liste d'instruction
-
-				Prog.ajouter(Inst.creation1(Operation.BRA, Operande.creationOpEtiq(etiqFOR))); // Branch vers For
-
-				Prog.ajouter( etiqEXIT, " L'etiquette de la fin du POUR") ; // EXIT : 
 			}
 
 			libererRegistre(rdebut);
@@ -420,10 +408,10 @@ public class CoderProg {
 			break;
 
 		case Lecture:
-			// On teste s'il reste des registres, normalement il y en a toujours
+			/* Récupérer l'opérande de l'identificateur */
+			op = coder_PLACE(a.getFils1());
 
-			offset = coder_PLACE(a.getFils1(), null);
-
+			/* Récupérer le type de l'identificateur */
 			Decor dec;
 			if( (dec = a.getFils1().getDecor()) == null ) {
 				throw new RuntimeException("lecture n'a pas de decor");
@@ -432,23 +420,25 @@ public class CoderProg {
 			if((t = dec.getType())== null) {
 				throw new RuntimeException("le decor n'a pas de type");
 			}
+			
+			/* Faire une sauvegarde du registre R1 */
+			offset_tmp = allouerTemp(Registre.R1);
+
+			/* Lire correctement la valeur */
 			if(t.equals(Type.Integer)) {
-
-				Prog.ajouter(Inst.creation0(Operation.RINT), " Lecture d'entier");
-				Prog.ajouter(Inst.creation1(Operation.BOV, Operande.creationOpEtiq(Etiq.lEtiq("ERR_READ_OV"))));
-
-				Prog.ajouter(Inst.creation2(Operation.STORE, Operande.opDirect(Registre.R1), Operande.creationOpIndirect(offset, Registre.GB)));
-				libererRegistre(Registre.R1);
-
-			}else if(t.equals(Type.Real)){
-
-				Prog.ajouter(Inst.creation0(Operation.RFLOAT), "Lecture de reel");
-				Prog.ajouter(Inst.creation1(Operation.BOV, Operande.creationOpEtiq(Etiq.lEtiq("ERR_READ_OV"))));
-
-				Prog.ajouter(Inst.creation2(Operation.STORE, Operande.opDirect(Registre.R1), Operande.creationOpIndirect(offset, Registre.GB)));
-				libererRegistre(Registre.R1);
-
+				Prog.ajouter(Inst.creation0(Operation.RINT), "Lecture d'entier");
 			}
+			else {
+				Prog.ajouter(Inst.creation0(Operation.RFLOAT), "Lecture de reel");
+			}
+			
+			/* Test de débordement */
+			Prog.ajouter(Inst.creation1(Operation.BOV, Operande.creationOpEtiq(Etiq.lEtiq("ERR_READ_OV"))));
+			/* Charger la valeur en pile */
+			Prog.ajouter(Inst.creation2(Operation.STORE, Operande.R1, op));
+
+			/* Rétablir la valeur de R1 */
+			Prog.ajouter(Inst.creation2(Operation.LOAD, Operande.creationOpIndirect(offset_tmp, Registre.GB), Operande.R1));
 
 			break;
 
@@ -669,7 +659,12 @@ public class CoderProg {
 	/**************************************************************************
 	 * PLACE
 	 **************************************************************************/
-	private int coder_PLACE(Arbre a, Registre r)  {
+	private Operande coder_PLACE(Arbre a)  {
+		Operande op_gauche, op_ret;
+		Registre r;
+		boolean alloc_tmp = false;
+		int offset_tmp = 0;
+		
 		switch(a.getNoeud()) {
 
 		case Ident:
@@ -677,10 +672,24 @@ public class CoderProg {
 			if(!testerID(a.getChaine())) {
 				allouerOffsetID(a.getChaine(), a);	
 			}
-			// On retourne l'offset correspondant a l'ID
-			return getOffset(a.getChaine());
+			
+			// On retourne l'opérande associé
+			return Operande.creationOpIndirect(getOffset(a.getChaine()), Registre.GB);
 
 		case Index:
+			/* Récupérer l'opérande de notre fils gauche */
+			op_gauche = coder_PLACE(a.getFils1());
+			
+			/* On alloue un registre */
+			if(resteRegistre()) {
+				r = allouerRegistre();
+			}
+			else {
+				r = Registre.R0;
+				offset_tmp = allouerTemp(r);
+				alloc_tmp = true;
+			}
+			
 			/* On calcule l'index dans r */
 			coder_EXP(a.getFils2(), r);
 			/* Tester un débordement d'index */
@@ -688,14 +697,27 @@ public class CoderProg {
 			testerIndex(r, t_inter);
 			/* Calculer l'adresse de la valeur */
 			Prog.ajouter(Inst.creation2(Operation.SUB, Operande.creationOpEntier(t_inter.getBorneInf()), Operande.opDirect(r)), "Décallage de " + t_inter.getBorneInf() + " pour obtenir l'adresse");
+			
+			/* Création de l'opérande */
+			op_ret = Operande.creationOpIndexe(op_gauche.getDeplacement(), Registre.GB, r);
+			
+			/* Libération du registre */
+			if(alloc_tmp) {
+				Prog.ajouter(Inst.creation2(Operation.LOAD, Operande.creationOpIndirect(offset_tmp, Registre.GB), Operande.opDirect(r)));
+			}
+			else {
+				libererRegistre(r);
+			}
+			
 			/* On renvoie l'offset du début du tableau */
-			return coder_PLACE(a.getFils1(), r);
+			return op_ret;
 
 		default:
 			break;
 			//throw new ErreurInterneVerif("Arbre incorrect dans verifier_PLACE");
 		}
-		return 0;
+		
+		return null;
 	}
 
 	/**************************************************************************
@@ -757,23 +779,31 @@ public class CoderProg {
 			break;
 
 		case Ident:
-			/* Vérifier la nature de l'identificateur */
-			Operande ident = generateOperande(a);
+			/* Récupération de l'identificateur */
+			Operande ident = coder_PLACE(a);
+			
+			/* Sauvegarde du registre R1 */
+			Prog.ajouter(Inst.creation1(Operation.PUSH, Operande.R1), "Sauvegarde de la valeur de R1");
 
+			/* Charger la valeur dans R1 */
+			Prog.ajouter(Inst.creation2(Operation.LOAD, ident, Operande.R1));
+
+			/* Afficher correctement l'identificateur */
 			// Si le type est un Integer 
 			if(a.getDecor().getType() == Type.Integer) {
-				Prog.ajouter(Inst.creation2(Operation.LOAD, generateOperande(a), Operande.R1));
 				Prog.ajouter(Inst.creation0(Operation.WINT), "Ecrire valeur de "+a.getChaine());
 			}
 			// Si le type est un Real
 			else if (a.getDecor().getType() == Type.Real) {
-				Prog.ajouter(Inst.creation2(Operation.LOAD, generateOperande(a), Operande.R1));
 				Prog.ajouter(Inst.creation0(Operation.WFLOAT), "Ecrire valeur de " + a.getChaine());
 			}
 			// Si le type est une String ou un Boolean on jette une exception
 			else {
 				throw new ErreurInst("L'affichage n'est pas possible pour ce type.");
-			}						
+			}
+			
+			/* Rétablir la valeur de R1 */
+			Prog.ajouter(Inst.creation1(Operation.POP, Operande.R1), "Rétablir la valeur de R1");
 			break;
 			
 
@@ -959,13 +989,10 @@ public class CoderProg {
 					
 				case Index:
 					/* Récupérer l'adresse du tableau */
-					offset = coder_PLACE(a.getFils1(), null);
-					
-					/* Calculer l'index */
-					coder_EXP(a.getFils2(), r);
+					Operande op = coder_PLACE(a);
 					
 					/* Charger la valeur dans le registre */
-					Prog.ajouter(Inst.creation2(Operation.LOAD, Operande.creationOpIndexe(offset, Registre.GB, r), Operande.opDirect(r)));
+					Prog.ajouter(Inst.creation2(Operation.LOAD, op, Operande.opDirect(r)));
 					return;
 
 				}
