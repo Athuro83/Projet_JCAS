@@ -668,7 +668,6 @@ public class CoderProg {
 	
 	/**************************************************************************
 	 * PLACE
-	 * @param r TODO
 	 **************************************************************************/
 	private int coder_PLACE(Arbre a, Registre r)  {
 		switch(a.getNoeud()) {
@@ -684,9 +683,11 @@ public class CoderProg {
 		case Index:
 			/* On calcule l'index dans r */
 			coder_EXP(a.getFils2(), r);
-			//TODO EXPERIMENTAL
 			/* Tester un débordement d'index */
-			testerIndex(r, getArrayInterval(a.getFils1()));
+			Type t_inter = getArrayInterval(a.getFils1());
+			testerIndex(r, t_inter);
+			/* Calculer l'adresse de la valeur */
+			Prog.ajouter(Inst.creation2(Operation.SUB, Operande.creationOpEntier(t_inter.getBorneInf()), Operande.opDirect(r)), "Décallage de " + t_inter.getBorneInf() + " pour obtenir l'adresse");
 			/* On renvoie l'offset du début du tableau */
 			return coder_PLACE(a.getFils1(), r);
 
